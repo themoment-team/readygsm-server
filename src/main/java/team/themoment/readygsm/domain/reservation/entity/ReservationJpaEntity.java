@@ -25,16 +25,16 @@ public class ReservationJpaEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserJpaEntity user;
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "reservation_phone_number", nullable = false)
     private String phoneNumber;
-    @Column(name="school_name", nullable = false)
+    @Column(name="reservation_school_name", nullable = false)
     private String schoolName;
-    @Column(name = "grade", nullable = false)
+    @Column(name = "reservation_grade", nullable = false)
     private Integer grade;
-    @Column(name = "class_number", nullable = false)
+    @Column(name = "reservation_class_number", nullable = false)
     private Integer classNumber;
-    @Column(name = "student_number", nullable = false)
+    @Column(name = "reservation_student_number", nullable = false)
     private Integer studentNumber;
-    @Column(name="applicant_name", nullable = false)
+    @Column(name="reservation_applicant_name", nullable = false)
     private String applicantName;
 }
