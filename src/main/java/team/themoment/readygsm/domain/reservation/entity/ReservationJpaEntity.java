@@ -27,13 +27,13 @@ public class ReservationJpaEntity {
     private UserJpaEntity user;
     @Column(name = "reservation_phone_number", nullable = false)
     private String phoneNumber;
-    @Column(name="reservation_school_name", nullable = false)
+    @Column(name="reservation_school_name")
     private String schoolName;
-    @Column(name = "reservation_grade", nullable = false)
+    @Column(name = "reservation_grade")
     private Integer grade;
-    @Column(name = "reservation_class_number", nullable = false)
+    @Column(name = "reservation_class_number")
     private Integer classNumber;
-    @Column(name = "reservation_student_number", nullable = false)
+    @Column(name = "reservation_student_number")
     private Integer studentNumber;
     @Column(name="reservation_applicant_name", nullable = false)
     private String applicantName;
