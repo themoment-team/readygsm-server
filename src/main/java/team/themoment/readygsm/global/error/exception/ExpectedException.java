@@ -4,10 +4,10 @@ import lombok.Getter;
 import team.themoment.readygsm.global.error.ErrorCode;
 
 @Getter
-public class ReadyGsmException extends RuntimeException {
+public class ExpectedException extends RuntimeException {
     private final ErrorCode errorCode;
 
-    public ReadyGsmException(ErrorCode errorCode) {
+    public ExpectedException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }

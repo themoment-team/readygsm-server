@@ -7,13 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import team.themoment.readygsm.global.error.data.response.ErrorResponse;
-import team.themoment.readygsm.global.error.exception.ReadyGsmException;
+import team.themoment.readygsm.global.error.exception.ExpectedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ReadyGsmException.class)
-    public ResponseEntity<ErrorResponse> handleReadyGsmException(ReadyGsmException e) {
+    @ExceptionHandler(ExpectedException.class)
+    public ResponseEntity<ErrorResponse> handleExpectedException(ExpectedException e) {
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(new ErrorResponse(e.getErrorCode().getMessage(), e.getErrorCode().getStatus()));
