@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 import team.themoment.readygsm.domain.user.presentation.data.response.GetUserResDto;
+import team.themoment.readygsm.domain.user.presentation.data.response.PatchUserResDto;
 import team.themoment.readygsm.domain.user.service.FindUserService;
+import team.themoment.readygsm.domain.user.service.ModifyUserService;
 import team.themoment.readygsm.domain.user.service.SearchUserService;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class UserController {
 
     private final FindUserService findUserService;
     private final SearchUserService searchUserService;
+    private final ModifyUserService modifyUserService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<GetUserResDto> getUser(@PathVariable(value = "userId") Long userId) {
@@ -41,5 +44,14 @@ public class UserController {
     ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(searchUserService.execute(name, email, role, page, limit));
+    }
+
+    @PatchMapping("/{userId}")
+    public ResponseEntity<PatchUserResDto> updateUser(
+            @PathVariable(value = "userId") Long userId,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "email", required = false) String email
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(modifyUserService.execute(userId, name, email));
     }
 }
