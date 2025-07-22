@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 import team.themoment.readygsm.domain.user.presentation.data.response.GetUserResDto;
 import team.themoment.readygsm.domain.user.service.FindUserService;
+import team.themoment.readygsm.domain.user.service.SearchUserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 public class UserController {
 
     private final FindUserService findUserService;
+    private final SearchUserService searchUserService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<GetUserResDto> getUser(@PathVariable(value = "userId") Long userId) {
@@ -32,13 +34,12 @@ public class UserController {
     @GetMapping("/search")
     public ResponseEntity<List<GetUserResDto>> searchUsers(
             @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "schoolName", required = false) String schoolName,
-            @RequestParam(value = "grade", required = false) Integer grade,
-            @RequestParam(value = "classNumber", required = false) Integer classNumber,
-            @RequestParam(value = "number", required = false) Integer number,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "role", required = false) UserRole role,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "limit", defaultValue = "255") int limit
     ) {
-
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(searchUserService.execute(name, email, role, page, limit));
     }
 }
