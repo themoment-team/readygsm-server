@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import team.themoment.readygsm.domain.user.data.User;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 
 @Table(name = "user")
@@ -26,8 +27,8 @@ public class UserJpaEntity {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    public UserJpaEntity toDto() {
-        return UserJpaEntity.builder()
+    public User toDto() {
+        return User.builder()
                 .id(id)
                 .email(email)
                 .name(name)
