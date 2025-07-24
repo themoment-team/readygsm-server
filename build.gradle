@@ -40,6 +40,9 @@ dependencies {
 	/* Database */
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
+	/* Swagger */
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
 	/* Testing */
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
