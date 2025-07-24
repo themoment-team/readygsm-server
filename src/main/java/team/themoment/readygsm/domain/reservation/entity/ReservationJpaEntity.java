@@ -37,8 +37,4 @@ public class ReservationJpaEntity {
     private Integer studentNumber;
     @Column(name="reservation_applicant_name", nullable = false)
     private String applicantName;
-
-    public void postReservation() {
-
-    }
 }
