@@ -1,5 +1,6 @@
 package team.themoment.readygsm.domain.reservation.presentation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class ReservationController {
 
     @PostMapping("/{activityId}")
     public ResponseEntity<PostReservationResDto> postReservation(
-            @RequestBody PostReservationReqDto reqDto,
+            @RequestBody @Valid PostReservationReqDto reqDto,
             @PathVariable("activityId") String activityId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 reservationService.PostReservation(1L, Long.valueOf(activityId), reqDto));
