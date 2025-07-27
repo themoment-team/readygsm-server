@@ -1,0 +1,18 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${ID}
+            client-secret: ${clients_password}
+            scope:
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+        provider:
+          google:
+            user-name-attribute: sub
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
