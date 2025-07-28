@@ -21,9 +21,8 @@ public class ReservationService {
             Long userId,
             Long activityId,
             PostReservationReqDto reqDto) {
-        if(!(activityJpaRepository.findById(activityId).isPresent())) {
+        if(!(activityJpaRepository.existsById(activityId))) {
             throw new ExpectedException(ErrorCode.ACTIVITY_NOT_FOUND);
         }
-        reservationJpaRepository.save();
     }
 }
