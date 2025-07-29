@@ -72,4 +72,9 @@ public class JwtProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public long getExpirationMinutes() {
+        return expirationSeconds / 60;
+    }
+
 }

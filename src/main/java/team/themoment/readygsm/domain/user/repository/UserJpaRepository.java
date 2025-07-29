@@ -6,17 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
-import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
 
 import java.util.Optional;
 
 @Repository
-
 public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
-    Optional<UserJpaEntity> findByEmail(String email); // 추가됨
-
     @Query("SELECT u FROM UserJpaEntity u WHERE " +
             "(:name IS NULL OR :name = '' OR u.name LIKE %:name%) AND " +
             "(:email IS NULL OR :email = '' OR u.email LIKE %:email%) AND " +

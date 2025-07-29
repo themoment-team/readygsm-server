@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.themoment.readygsm.domain.activity.entity.ActivityJpaEntity;
-import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
 
 @Table(name = "reservation")
 @Getter
