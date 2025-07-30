@@ -4,12 +4,12 @@ spring:
       client:
         registration:
           google:
-            client-id: ${ID}
-            client-secret: ${clients_password}
+            client-id: ${CLIENTS_ID}
+            client-secret: ${CLIENTS_PASSWORD}
             scope:
               - profile
               - email
-            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            redirect-uri: "http://localhost:8080/token"
         provider:
           google:
             user-name-attribute: sub

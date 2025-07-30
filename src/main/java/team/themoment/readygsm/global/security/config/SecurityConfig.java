@@ -29,15 +29,16 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/login/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/token").permitAll() // 여기에 /token 경로 허용 추가
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2 -> {}) // 빈 람다로 호출하여 deprecated 회피
 
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
+
 }
