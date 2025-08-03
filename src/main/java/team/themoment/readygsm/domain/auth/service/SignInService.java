@@ -1,7 +1,6 @@
 package team.themoment.readygsm.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import team.themoment.readygsm.domain.auth.dto.AuthResponse;
 import team.themoment.readygsm.domain.auth.entity.AuthJpaEntity;
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class SignInService {
 
     private final OAuthProvider oAuthProvider;
     private final JwtProvider jwtProvider;
