@@ -2,6 +2,7 @@ package team.themoment.readygsm.domain.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import team.themoment.readygsm.domain.user.data.constant.UserRole;
 
 import java.time.LocalDateTime;
 
@@ -12,5 +13,5 @@ public class AuthResponse {
     private String token;
     private LocalDateTime tokenExpiresAt;
     private LocalDateTime tokenIssuedAt;
-    private String role;
+    private UserRole role;
 }
