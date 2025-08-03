@@ -6,19 +6,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import team.themoment.readygsm.domain.auth.dto.AuthRequest;
+import team.themoment.readygsm.domain.auth.dto.SignInReqDto;
 import team.themoment.readygsm.domain.auth.dto.AuthResponse;
-import team.themoment.readygsm.domain.auth.service.AuthService;
+import team.themoment.readygsm.domain.auth.service.SignInService;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final SignInService authService;
 
-    @PostMapping("/token")
-    public ResponseEntity<AuthResponse> authorizeWithCode(@RequestBody AuthRequest request) {
+    @PostMapping("/signin")
+    public ResponseEntity<AuthResponse> authorizeWithCode(@RequestBody SignInReqDto request) {
         AuthResponse response = authService.authenticateWithCode(request.getCode());
         return ResponseEntity.ok(response);
     }
