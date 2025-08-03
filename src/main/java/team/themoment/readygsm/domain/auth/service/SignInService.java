@@ -6,6 +6,7 @@ import team.themoment.readygsm.domain.auth.dto.AuthResponse;
 import team.themoment.readygsm.domain.auth.entity.AuthJpaEntity;
 import team.themoment.readygsm.domain.auth.provider.OAuthProvider;
 import team.themoment.readygsm.domain.auth.repository.AuthJpaRepository;
+import team.themoment.readygsm.domain.user.data.constant.UserRole;
 import team.themoment.readygsm.global.security.jwt.JwtProvider;
 import team.themoment.readygsm.global.security.oauth.OAuthUserInfo;
 
@@ -34,7 +35,7 @@ public class SignInService {
                 .token(token)
                 .tokenIssuedAt(now)
                 .tokenExpiresAt(now.plusMinutes(jwtProvider.getExpirationMinutes()))
-                .role(user.getRole().name())
+                .role(UserRole.USER)
                 .build();
     }
 }
