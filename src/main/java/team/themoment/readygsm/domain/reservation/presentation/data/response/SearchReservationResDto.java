@@ -5,12 +5,12 @@ import team.themoment.readygsm.domain.reservation.presentation.data.dto.SearchRe
 
 public record SearchReservationResDto(
         Long reservationId,
-		String phoneNumber,
-		String schoolName,
-		Integer grade,
-		Integer classNumber,
-		Integer studentNumber,
-		String applicantName,
+        String phoneNumber,
+        String schoolName,
+        Integer grade,
+        Integer classNumber,
+        Integer studentNumber,
+        String applicantName,
         SearchReservationAcitivityDto activity
 ) {
 }
