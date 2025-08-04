@@ -30,11 +30,11 @@ public class ReservationController {
     /* 접근 권한 : TEACHER */
     @GetMapping("/search")
     public ResponseEntity<List<SearchReservationResDto>> searchReservation(
-            @RequestParam String activityName,
-            @RequestParam String applicantName,
-            @RequestParam String phoneNumber,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(required = false) String activityName,
+            @RequestParam(required = false) String applicantName,
+            @RequestParam(required = false) String phoneNumber,
+            @RequestParam(defaultValue = "0",required = false) int page,
+            @RequestParam(defaultValue = "10",required = false) int limit
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 searchReservationService.searchReservation(
