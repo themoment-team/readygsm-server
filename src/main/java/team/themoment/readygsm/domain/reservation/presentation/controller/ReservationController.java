@@ -50,10 +50,10 @@ public class ReservationController {
     @PostMapping("/{activityId}")
     public ResponseEntity<PostReservationResDto> postReservation(
             @RequestBody @Valid PostReservationReqDto reqDto,
-            @PathVariable("activityId") String activityId) {
+            @PathVariable("activityId") Long activityId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 // 첫번째 인자는 header에 jwt토큰에서 userId를 보내는것을 구현해주셔야 합니다
-                postReservationService.PostReservation(1L, Long.valueOf(activityId), reqDto));
+                postReservationService.PostReservation(1L, activityId, reqDto));
     }
 
     /* 특정 사용자 예약 추가 */
@@ -61,11 +61,11 @@ public class ReservationController {
     @PostMapping("/{activityId}/{userId}")
     public ResponseEntity<PostUserReservationResDto> postUserReservation(
             @RequestBody @Valid PostReservationReqDto reqDto,
-            @PathVariable("activityId") String activityId,
-            @PathVariable("userId") String userId) {
+            @PathVariable("activityId") Long activityId,
+            @PathVariable("userId") Long userId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 postUserReservationService.postUserReservation(
-                        reqDto, Long.valueOf(activityId), Long.valueOf(userId)
+                        reqDto, activityId, userId
                 )
         );
     }
@@ -75,8 +75,8 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{reservationId}")
     public void deleteReservation(
-            @PathVariable("reservationId") String reservationId) {
+            @PathVariable("reservationId") Long reservationId) {
         // 첫번째 인자는 header에 jwt토큰에서 userId를 보내는것을 구현해주셔야 합니다
-        deleteReservationService.deleteReservation(1L, Long.valueOf(reservationId));
+        deleteReservationService.deleteReservation(1L, reservationId);
     }
 }
