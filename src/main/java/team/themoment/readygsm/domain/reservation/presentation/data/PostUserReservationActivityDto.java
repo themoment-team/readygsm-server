@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public record PostUserReservationActivityDto(
         Long activityId,
         String activityName,
-        String acitvityImage,
+        String activityImage,
         LocalDate activityDate,
         Integer currentApplicant,
         Integer maxApplicant,
