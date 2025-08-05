@@ -1,7 +1,7 @@
 package team.themoment.readygsm.domain.reservation.presentation.data.response;
 
 
-import team.themoment.readygsm.domain.reservation.presentation.data.dto.SearchReservationAcitivityDto;
+import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 
 public record SearchReservationResDto(
         Long reservationId,
@@ -11,6 +11,6 @@ public record SearchReservationResDto(
         Integer classNumber,
         Integer studentNumber,
         String applicantName,
-        SearchReservationAcitivityDto activity
+        SearchReservationActivityDto activity
 ) {
 }

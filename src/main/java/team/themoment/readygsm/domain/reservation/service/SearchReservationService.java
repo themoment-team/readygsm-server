@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
-import team.themoment.readygsm.domain.reservation.presentation.data.dto.SearchReservationAcitivityDto;
+import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.SearchReservationResDto;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
 
@@ -39,7 +39,7 @@ public class SearchReservationService {
                         r.getClassNumber(),
                         r.getStudentNumber(),
                         r.getApplicantName(),
-                        new SearchReservationAcitivityDto(
+                        new SearchReservationActivityDto(
                                 r.getActivity().getId(),
                                 r.getActivity().getName(),
                                 r.getActivity().getImage(),

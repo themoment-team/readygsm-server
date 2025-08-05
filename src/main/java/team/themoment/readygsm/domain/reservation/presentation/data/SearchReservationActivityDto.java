@@ -5,7 +5,7 @@ import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public record SearchReservationAcitivityDto(
+public record SearchReservationActivityDto(
         Long activityId,
         String activityName,
         String activityImage,
