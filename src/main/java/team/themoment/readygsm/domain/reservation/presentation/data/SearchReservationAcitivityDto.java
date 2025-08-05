@@ -1,4 +1,4 @@
-package team.themoment.readygsm.domain.reservation.presentation.data.dto;
+package team.themoment.readygsm.domain.reservation.presentation.data;
 
 import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
 
