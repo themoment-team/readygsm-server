@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
 import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.SearchReservationResDto;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SearchReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
     public List<SearchReservationResDto> searchReservation(
