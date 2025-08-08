@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
+import team.themoment.readygsm.domain.reservation.data.Reservation;
 import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.SearchReservationResDto;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
@@ -25,12 +25,12 @@ public class SearchReservationService {
             int page,
             int limit
     ) {
-        Page<ReservationJpaEntity> searchResult = reservationJpaRepository.findByInformation(
+        Page<Reservation> searchResult = reservationJpaRepository.findByInformation(
                 activityName,
                 applicantName,
                 phoneNumber,
                 PageRequest.of(page, limit)
-        );
+        ).map(entity -> entity.toDto());
 
         return searchResult.getContent().stream()
                 .map(r -> new SearchReservationResDto(
@@ -42,20 +42,20 @@ public class SearchReservationService {
                         r.getStudentNumber(),
                         r.getApplicantName(),
                         new SearchReservationActivityDto(
-                                r.getActivity().getId(),
-                                r.getActivity().getName(),
-                                r.getActivity().getImage(),
-                                r.getActivity().getDate(),
-                                r.getActivity().getCurrentApplicant(),
-                                r.getActivity().getMaxApplicant(),
-                                r.getActivity().getType(),
-                                r.getActivity().getPlace(),
-                                r.getActivity().getMajor(),
-                                r.getActivity().getApplicationStart(),
-                                r.getActivity().getApplicationEnd(),
+                                r.getActivityId().getId(),
+                                r.getActivityId().getName(),
+                                r.getActivityId().getImage(),
+                                r.getActivityId().getDate(),
+                                r.getActivityId().getCurrentApplicant(),
+                                r.getActivityId().getMaxApplicant(),
+                                r.getActivityId().getType(),
+                                r.getActivityId().getPlace(),
+                                r.getActivityId().getMajor(),
+                                r.getActivityId().getApplicationStart(),
+                                r.getActivityId().getApplicationEnd(),
                                 getApplicationStatus(
-                                        r.getActivity().getApplicationStart(),
-                                        r.getActivity().getApplicationEnd())
+                                        r.getActivityId().getApplicationStart(),
+                                        r.getActivityId().getApplicationEnd())
                         )
                 )).toList();
     }
