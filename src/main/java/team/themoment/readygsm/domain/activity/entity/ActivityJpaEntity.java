@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.themoment.readygsm.domain.activity.data.Activity;
 import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
-import team.themoment.readygsm.global.error.ErrorCode;
-import team.themoment.readygsm.global.error.exception.ExpectedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -60,12 +58,5 @@ public class ActivityJpaEntity {
                 .applicationStart(applicationStart)
                 .applicationEnd(applicationEnd)
                 .build();
-    }
-
-    public void isFullorIncrease() {
-        if(currentApplicant >= maxApplicant) {
-            throw new ExpectedException(ErrorCode.ACTIVITY_FULL);
-        }
-        this.currentApplicant++;
     }
 }
