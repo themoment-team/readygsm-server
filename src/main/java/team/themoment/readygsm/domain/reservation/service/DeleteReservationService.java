@@ -3,6 +3,7 @@ package team.themoment.readygsm.domain.reservation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.themoment.readygsm.domain.activity.repository.ActivityJpaRepository;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
 import team.themoment.readygsm.global.error.ErrorCode;
 import team.themoment.readygsm.global.error.exception.ExpectedException;
@@ -12,6 +13,7 @@ import team.themoment.readygsm.global.error.exception.ExpectedException;
 @Transactional
 public class DeleteReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
+    private final ActivityJpaRepository activityJpaRepository;
 
     public void deleteReservation(Long userId, Long reservationId) {
         int deletedCount = reservationJpaRepository.deleteByIdAndUserId(userId, reservationId);
@@ -21,6 +23,11 @@ public class DeleteReservationService {
             } else {
                 throw new ExpectedException(ErrorCode.RESERVATION_FORBIDDEN);
             }
+        }
+
+        Long activityId = reservationJpaRepository.findById(reservationId).get().getActivity().getId();
+        if(activityJpaRepository.existsById(activityId)) {
+            activityJpaRepository.decreaseActivityApplicant(activityId);
         }
     }
 }
