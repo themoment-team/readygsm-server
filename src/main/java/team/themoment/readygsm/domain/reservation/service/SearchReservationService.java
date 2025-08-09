@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsm.domain.reservation.data.Reservation;
+import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
 import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.SearchReservationResDto;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
@@ -30,7 +31,7 @@ public class SearchReservationService {
                 applicantName,
                 phoneNumber,
                 PageRequest.of(page, limit)
-        ).map(entity -> entity.toDto());
+        ).map(ReservationJpaEntity::toDto);
 
         return searchResult.getContent().stream()
                 .map(r -> new SearchReservationResDto(
