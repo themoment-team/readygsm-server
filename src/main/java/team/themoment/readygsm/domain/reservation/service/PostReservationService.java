@@ -39,16 +39,16 @@ public class PostReservationService {
 
         Reservation savedReservation = reservationJpaRepository.save(
                 Reservation.builder()
-                .activityId(activity)
-                .userId(user)
-                .phoneNumber(reqDto.phoneNumber())
-                .schoolName(reqDto.schoolName())
-                .grade(reqDto.grade())
-                .classNumber(reqDto.classNumber())
-                .studentNumber(reqDto.studentNumber())
-                .applicantName(reqDto.applicantName())
-                .build()
-                .toEntity()
+                        .activityId(activity)
+                        .userId(user)
+                        .phoneNumber(reqDto.phoneNumber())
+                        .schoolName(reqDto.schoolName())
+                        .grade(reqDto.grade())
+                        .classNumber(reqDto.classNumber())
+                        .studentNumber(reqDto.studentNumber())
+                        .applicantName(reqDto.applicantName())
+                        .build()
+                        .toEntity()
         ).toDto();
 
         return new PostReservationResDto(
