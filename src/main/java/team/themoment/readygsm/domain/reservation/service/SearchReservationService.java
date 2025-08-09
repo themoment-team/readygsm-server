@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsm.domain.reservation.data.Reservation;
 import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
+import team.themoment.readygsm.domain.reservation.presentation.data.ApplicationStatus;
 import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.SearchReservationResDto;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
@@ -64,11 +65,15 @@ public class SearchReservationService {
     // 활동 상태
     private String getApplicationStatus(LocalDateTime startTime, LocalDateTime endTime) {
         LocalDateTime now = LocalDateTime.now();
+        ApplicationStatus status;
+
         if(now.isBefore(startTime)) {
-            return "UPCOMING";
+            status = ApplicationStatus.UPCOMING;
         } else if(now.isAfter(endTime)) {
-            return "CLOSED";
+            status = ApplicationStatus.CLOSED;
+        } else {
+            status = ApplicationStatus.OPEN;
         }
-        return "OPEN";
+        return status.name();
     }
 }
