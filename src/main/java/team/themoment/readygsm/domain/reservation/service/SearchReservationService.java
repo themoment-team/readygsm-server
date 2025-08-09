@@ -27,7 +27,7 @@ public class SearchReservationService {
             int page,
             int limit
     ) {
-        Page<Reservation> searchResult = reservationJpaRepository.findByInformation(
+        Page<Reservation> searchResult = reservationJpaRepository.findByActivityNameAndApplicantNameAndPhoneNumberWithPaging(
                 activityName,
                 applicantName,
                 phoneNumber,

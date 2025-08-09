@@ -30,7 +30,7 @@ public interface ReservationJpaRepository extends JpaRepository<ReservationJpaEn
     WHERE (:activityName IS NULL OR a.name LIKE %:activityName%)
     AND (:applicantName IS NULL OR r.applicantName LIKE %:applicantName%)
     AND (:phoneNumber IS NULL OR r.phoneNumber = :phoneNumber)""")
-    Page<ReservationJpaEntity> findByInformation(
+    Page<ReservationJpaEntity> findByActivityNameAndApplicantNameAndPhoneNumberWithPaging(
             String activityName,
             String applicantName,
             String phoneNumber,
