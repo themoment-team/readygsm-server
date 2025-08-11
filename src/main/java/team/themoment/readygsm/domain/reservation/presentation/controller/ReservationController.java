@@ -26,8 +26,6 @@ public class ReservationController {
     private final PostUserReservationService postUserReservationService;
     private final DeleteReservationService deleteReservationService;
 
-    /* 예약 검색 */
-    /* 접근 권한 : TEACHER */
     @GetMapping("/search")
     public ResponseEntity<List<SearchReservationResDto>> searchReservation(
             @RequestParam(required = false) String activityName,
@@ -45,19 +43,14 @@ public class ReservationController {
                 limit));
     }
 
-    /* 활동 예약 */
-    /* 접근 권한 : STUDENT */
     @PostMapping("/{activityId}")
     public ResponseEntity<PostReservationResDto> postReservation(
             @RequestBody @Valid PostReservationReqDto reqDto,
             @PathVariable("activityId") Long activityId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                // 첫번째 인자는 header에 jwt토큰에서 userId를 보내는것을 구현해주셔야 합니다
-                postReservationService.PostReservation(1L, activityId, reqDto));
+                postReservationService.PostReservation(activityId, reqDto));
     }
 
-    /* 특정 사용자 예약 추가 */
-    /* 접근 권한 : TEACHER */
     @PostMapping("/{activityId}/{userId}")
     public ResponseEntity<PostUserReservationResDto> postUserReservation(
             @RequestBody @Valid PostReservationReqDto reqDto,
@@ -70,13 +63,10 @@ public class ReservationController {
         );
     }
 
-    /* 예약 취소 */
-    /* 접근 권한 : STUDENT */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{reservationId}")
     public void deleteReservation(
             @PathVariable("reservationId") Long reservationId) {
-        // 첫번째 인자는 header에 jwt토큰에서 userId를 보내는것을 구현해주셔야 합니다
-        deleteReservationService.deleteReservation(1L, reservationId);
+        deleteReservationService.deleteReservation(reservationId);
     }
 }

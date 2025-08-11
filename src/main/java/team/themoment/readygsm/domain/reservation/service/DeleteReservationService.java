@@ -15,7 +15,11 @@ public class DeleteReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
     private final ActivityJpaRepository activityJpaRepository;
 
-    public void deleteReservation(Long userId, Long reservationId) {
+    public void deleteReservation(Long reservationId) {
+
+        // TODO:여기에 현재 로그인된 사용자의 user_id가 들어가도록 수정 필요
+        Long userId = 1L;
+
         int deletedCount = reservationJpaRepository.deleteByIdAndUserId(userId, reservationId);
         if(deletedCount == 0) {
             if(reservationJpaRepository.existsById(reservationId)) {

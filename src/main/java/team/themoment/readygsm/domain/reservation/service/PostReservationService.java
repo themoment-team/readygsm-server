@@ -23,12 +23,14 @@ public class PostReservationService {
     private final UserJpaRepository userJpaRepository;
 
     public PostReservationResDto PostReservation(
-            Long userId,
             Long activityId,
             PostReservationReqDto reqDto) {
         Activity activity = activityJpaRepository.findById(activityId)
                 .orElseThrow(() -> new ExpectedException(ErrorCode.ACTIVITY_NOT_FOUND))
                 .toDto();
+
+        // TODO:여기에 현재 로그인된 사용자의 user_id가 들어가도록 수정 필요
+        Long userId = 1L;
 
         User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new ExpectedException(ErrorCode.USER_NOT_FOUND))
