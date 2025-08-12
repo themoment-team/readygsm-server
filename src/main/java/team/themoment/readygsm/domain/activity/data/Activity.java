@@ -45,7 +45,7 @@ public class Activity {
                 .build();
     }
 
-    public void isFulledApplicant() {
+    public void increaseActivityApplicant() {
         if(this.currentApplicant >= this.maxApplicant) {
             throw new ExpectedException(ErrorCode.ACTIVITY_FULL);
         }

@@ -38,7 +38,7 @@ public class PostUserReservationService {
                 .toDto();
 
         /* 예약 인원 가득 차면 예외처리, 아니면 인원 수 증가 */
-        activity.isFulledApplicant();
+        activity.increaseActivityApplicant();
 
         Reservation savedReservation = reservationJpaRepository.save(
                 Reservation.builder()
