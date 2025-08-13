@@ -31,6 +31,10 @@ public class CommonApiResponse<T> {
         return new CommonApiResponse(HttpStatus.CREATED, HttpStatus.CREATED.value(), message, null);
     }
 
+    public static CommonApiResponse deleted(@Nonnull String message) {
+        return new CommonApiResponse(HttpStatus.NO_CONTENT, HttpStatus.NO_CONTENT.value(), message, null);
+    }
+
     public static CommonApiResponse error(@Nonnull String message, @Nonnull HttpStatus status) {
         return new CommonApiResponse(status, status.value(), message, null);
     }
