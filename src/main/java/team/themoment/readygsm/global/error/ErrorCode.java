@@ -12,10 +12,12 @@ public enum ErrorCode {
     USER_NOT_FOUND("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value()),
 
     /* Activity */
+    ACTIVITY_FULL("활동 인원이 가득 찼습니다.", HttpStatus.CONFLICT.value()),
     ACTIVITY_NOT_FOUND("활동을 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value()),
 
     /* Reservation */
-    RESERVATION_NOT_FOUND("예약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
+    RESERVATION_NOT_FOUND("예약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value()),
+    RESERVATION_FORBIDDEN("본인의 예약이 아닙니다.", HttpStatus.FORBIDDEN.value());
 
     private final String message;
     private final int status;
