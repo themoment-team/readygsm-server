@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import team.themoment.readygsm.domain.reservation.presentation.data.request.PostReservationReqDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.PostReservationResDto;
@@ -30,43 +28,39 @@ public class ReservationController {
     private final PostUserReservationService postUserReservationService;
     private final DeleteReservationService deleteReservationService;
 
-    @Operation(summary = "예약 검색", description = "활동명, 지원자 이름, 전화번호를 이용하여 예약을 검색합니다.")
+    @Operation(summary = "예약 검색", description = "예약 관련 API")
     @GetMapping("/search")
-    public ResponseEntity<List<SearchReservationResDto>> searchReservation(
+    public List<SearchReservationResDto> searchReservation(
             @RequestParam(required = false) String activityName,
             @RequestParam(required = false) String applicantName,
             @RequestParam(required = false) String phoneNumber,
             @RequestParam(defaultValue = "0",required = false) int page,
             @RequestParam(defaultValue = "10",required = false) int limit
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(
-                searchReservationService.searchReservation(
-                        activityName,
-                        applicantName,
-                        phoneNumber,
-                        page,
-                        limit));
+        return searchReservationService.searchReservation(
+                activityName,
+                applicantName,
+                phoneNumber,
+                page,
+                limit);
     }
 
     @Operation(summary = "예약 추가", description = "로그인된 사용자의 예약을 생성합니다.")
     @PostMapping("/{activityId}")
-    public ResponseEntity<PostReservationResDto> postReservation(
+    public PostReservationResDto postReservation(
             @RequestBody @Valid PostReservationReqDto reqDto,
             @PathVariable("activityId") Long activityId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                postReservationService.PostReservation(activityId, reqDto));
+        return postReservationService.PostReservation(activityId, reqDto);
     }
 
     @Operation(summary = "특정 사용자 예약 추가", description = "지정된 사용자 ID를 이용해 사용자의 예약을 생성합니다.")
     @PostMapping("/{activityId}/{userId}")
-    public ResponseEntity<PostUserReservationResDto> postUserReservation(
+    public PostUserReservationResDto postUserReservation(
             @RequestBody @Valid PostReservationReqDto reqDto,
             @PathVariable("activityId") Long activityId,
             @PathVariable("userId") Long userId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                postUserReservationService.postUserReservation(
+        return postUserReservationService.postUserReservation(
                         reqDto, activityId, userId
-                )
         );
     }
 
