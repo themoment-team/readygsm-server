@@ -75,6 +75,6 @@ public class ReservationController {
     public CommonApiResponse<Void> deleteReservation(
             @PathVariable("reservationId") Long reservationId) {
         deleteReservationService.deleteReservation(reservationId);
-        return CommonApiResponse.deleted("예약이 취소되었습니다.");
+        return CommonApiResponse.success("예약이 취소되었습니다.");
     }
 }
