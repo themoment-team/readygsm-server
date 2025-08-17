@@ -20,16 +20,15 @@ public class DeleteReservationService {
         // TODO:여기에 현재 로그인된 사용자의 user_id가 들어가도록 수정 필요
         Long userId = 1L;
 
+        Long activityId = reservationJpaRepository.findById(reservationId)
+                .orElseThrow(() -> new ExpectedException(ErrorCode.RESERVATION_NOT_FOUND))
+                .getActivity().getId();
+
         int deletedCount = reservationJpaRepository.deleteByIdAndUserId(userId, reservationId);
         if(deletedCount == 0) {
-            if(reservationJpaRepository.existsById(reservationId)) {
-                throw new ExpectedException(ErrorCode.RESERVATION_NOT_FOUND);
-            } else {
-                throw new ExpectedException(ErrorCode.RESERVATION_FORBIDDEN);
-            }
+            throw new ExpectedException(ErrorCode.RESERVATION_FORBIDDEN);
         }
 
-        Long activityId = reservationJpaRepository.findById(reservationId).get().getActivity().getId();
         if(activityJpaRepository.existsById(activityId)) {
             activityJpaRepository.decreaseActivityApplicant(activityId);
         }
