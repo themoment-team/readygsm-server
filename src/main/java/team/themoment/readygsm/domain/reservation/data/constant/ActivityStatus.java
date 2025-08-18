@@ -1,4 +1,4 @@
-package team.themoment.readygsm.domain.reservation.data;
+package team.themoment.readygsm.domain.reservation.data.constant;
 
 public enum ActivityStatus {
     UPCOMING,

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsm.domain.reservation.data.Reservation;
 import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
-import team.themoment.readygsm.domain.reservation.presentation.data.constant.ActivityStatus;
+import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
 import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.SearchReservationResDto;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
