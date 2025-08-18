@@ -66,7 +66,7 @@ public class ReservationController {
 
     @Operation(summary = "예약 취소", description = "로그인된 사용자의 예약을 취소합니다.")
     @DeleteMapping("/{reservationId}")
-    public CommonApiResponse<Void> deleteReservation(
+    public CommonApiResponse deleteReservation(
             @PathVariable("reservationId") Long reservationId) {
         deleteReservationService.deleteReservation(reservationId);
         return CommonApiResponse.success("예약이 취소되었습니다.");
