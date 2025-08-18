@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsm.domain.activity.repository.ActivityJpaRepository;
+import team.themoment.readygsm.domain.reservation.exception.ReservationForbiddenException;
+import team.themoment.readygsm.domain.reservation.exception.ReservationNotFoundException;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
-import team.themoment.readygsm.global.error.ErrorCode;
-import team.themoment.readygsm.global.error.exception.ExpectedException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,12 +21,12 @@ public class DeleteReservationService {
         Long userId = 1L;
 
         Long activityId = reservationJpaRepository.findById(reservationId)
-                .orElseThrow(() -> new ExpectedException(ErrorCode.RESERVATION_NOT_FOUND))
+                .orElseThrow(ReservationNotFoundException::new)
                 .getActivity().getId();
 
         int deletedCount = reservationJpaRepository.deleteByIdAndUserId(userId, reservationId);
         if(deletedCount == 0) {
-            throw new ExpectedException(ErrorCode.RESERVATION_FORBIDDEN);
+            throw new ReservationForbiddenException();
         }
 
         if(activityJpaRepository.existsById(activityId)) {
