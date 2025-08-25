@@ -17,7 +17,8 @@ public enum ErrorCode {
 
     /* Reservation */
     RESERVATION_NOT_FOUND("예약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value()),
-    RESERVATION_FORBIDDEN("본인의 예약이 아닙니다.", HttpStatus.FORBIDDEN.value());
+    RESERVATION_FORBIDDEN("본인의 예약이 아닙니다.", HttpStatus.FORBIDDEN.value()),
+    RESERVATION_NON_UNIQUE("중복된 id의 예약이 존재합니다.", HttpStatus.CONFLICT.value());
 
     private final String message;
     private final int status;
