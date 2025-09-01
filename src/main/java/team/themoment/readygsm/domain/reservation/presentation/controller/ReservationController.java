@@ -1,6 +1,8 @@
 package team.themoment.readygsm.domain.reservation.presentation.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +67,10 @@ public class ReservationController {
     }
 
     @Operation(summary = "예약 취소", description = "로그인된 사용자의 예약을 취소합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "403", description = "자신의 예약이 아님"),
+            @ApiResponse(responseCode = "404", description = "해당 id를 가진 예약이 없음")
+    })
     @DeleteMapping("/{reservationId}")
     public CommonApiResponse deleteReservation(
             @PathVariable("reservationId") Long reservationId) {
