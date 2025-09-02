@@ -14,5 +14,5 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityJpaEntity, 
     SET a.currentApplicant = a.currentApplicant - 1
     WHERE a.id = :activityId
     AND a.currentApplicant > 0""")
-    void decreaseActivityApplicant(Long activityId);
+    int decreaseActivityApplicant(Long activityId);
 }
