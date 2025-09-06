@@ -59,7 +59,6 @@ public class PostUserReservationService {
                 new PostUserReservationActivityDto(
                         activityId,
                         activity.getName(),
-                        activity.getImage(),
                         activity.getDate(),
                         activity.getCurrentApplicant(),
                         activity.getMaxApplicant(),
