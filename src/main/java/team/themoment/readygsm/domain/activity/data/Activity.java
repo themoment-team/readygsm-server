@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 public class Activity {
     private Long id;
     private String name;
-    private String image;
     private Integer currentApplicant;
     private Integer maxApplicant;
     private ActivityType type;
@@ -32,7 +31,6 @@ public class Activity {
         return ActivityJpaEntity.builder()
                 .id(id)
                 .name(name)
-                .image(image)
                 .currentApplicant(currentApplicant)
                 .maxApplicant(maxApplicant)
                 .type(type)
