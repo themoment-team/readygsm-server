@@ -46,7 +46,6 @@ public class SearchReservationService {
                         new SearchReservationActivityDto(
                                 r.getActivityId().getId(),
                                 r.getActivityId().getName(),
-                                r.getActivityId().getImage(),
                                 r.getActivityId().getDate(),
                                 r.getActivityId().getCurrentApplicant(),
                                 r.getActivityId().getMaxApplicant(),

@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public record SearchReservationActivityDto(
         Long activityId,
         String activityName,
-        String activityImage,
         LocalDate activityDate,
         Integer currentApplicant,
         Integer maxApplicant,
