@@ -6,7 +6,7 @@ import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public record EditActivityResDto(
+public record PatchActivityResDto(
         Long activityId,
         String activityName,
         LocalDate activityDate,

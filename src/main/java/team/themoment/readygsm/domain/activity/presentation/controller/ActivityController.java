@@ -8,9 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import team.themoment.readygsm.domain.activity.presentation.data.request.EditActivityReqDto;
+import team.themoment.readygsm.domain.activity.presentation.data.request.PatchActivityReqDto;
 import team.themoment.readygsm.domain.activity.presentation.data.request.PostActivityReqDto;
-import team.themoment.readygsm.domain.activity.presentation.data.response.EditActivityResDto;
+import team.themoment.readygsm.domain.activity.presentation.data.response.PatchActivityResDto;
 import team.themoment.readygsm.domain.activity.presentation.data.response.PostActivityResDto;
 import team.themoment.readygsm.domain.activity.presentation.data.response.SearchActivityResDto;
 import team.themoment.readygsm.domain.activity.presentation.data.response.ViewActivityResDto;
@@ -28,7 +28,7 @@ public class ActivityController {
     private final ViewActivityService viewActivityService;
     private final SearchActivityService searchActivityService;
     private final PostActivityService postActivityService;
-    private final EditActivityService editActivityService;
+    private final PatchActivityService patchActivityService;
     private final DeleteActivityService deleteActivityService;
 
     @Operation(summary = "활동 조회", description = "활동 id로 활동을 조회합니다.")
@@ -59,11 +59,11 @@ public class ActivityController {
 
     @Operation(summary = "활동 수정", description = "활동을 수정합니다.")
     @PatchMapping("/{activityId}")
-    public EditActivityResDto editActivity(
-            @RequestBody @Valid EditActivityReqDto editActivityReqDto,
+    public PatchActivityResDto editActivity(
+            @RequestBody @Valid PatchActivityReqDto patchActivityReqDto,
             @PathVariable Long activityId
     ) {
-        return editActivityService.editActivity(editActivityReqDto, activityId);
+        return patchActivityService.editActivity(patchActivityReqDto, activityId);
     }
 
     @Operation(summary = "활동 삭제", description = "활동 id로 활동을 삭제합니다.")

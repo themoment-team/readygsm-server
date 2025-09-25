@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.themoment.readygsm.domain.activity.data.Activity;
 import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
-import team.themoment.readygsm.domain.activity.presentation.data.request.EditActivityReqDto;
+import team.themoment.readygsm.domain.activity.presentation.data.request.PatchActivityReqDto;
 import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
 
 import java.time.LocalDate;
@@ -59,7 +59,7 @@ public class ActivityJpaEntity {
                 .build();
     }
 
-    public void update(EditActivityReqDto ReqDto) {
+    public void update(PatchActivityReqDto ReqDto) {
         this.name = ReqDto.activityName();
         this.date = ReqDto.activityDate();
         this.maxApplicant = ReqDto.maxApplicant();
