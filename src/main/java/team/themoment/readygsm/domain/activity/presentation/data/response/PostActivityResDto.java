@@ -1,6 +1,7 @@
 package team.themoment.readygsm.domain.activity.presentation.data.response;
 
 import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
+import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,6 @@ public record PostActivityResDto(
         String activityMajor,
         LocalDateTime applicationStart,
         LocalDateTime applicationEnd,
-        String applicationStatus
+        ActivityStatus applicationStatus
 ) {
 }

@@ -69,7 +69,7 @@ public class ActivityJpaEntity {
         this.applicationEnd = ReqDto.applicationEnd();
     }
 
-    public static String getApplicationStatus(
+    public static ActivityStatus getApplicationStatus(
             LocalDateTime applicationStart,
             LocalDateTime applicationEnd
     ) {
@@ -83,6 +83,6 @@ public class ActivityJpaEntity {
         } else {
             status = ActivityStatus.OPEN;
         }
-        return status.name();
+        return status;
     }
 }
