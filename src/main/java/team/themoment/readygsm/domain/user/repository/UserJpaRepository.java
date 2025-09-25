@@ -22,4 +22,6 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
             @Param("role") UserRole role,
             Pageable pageable
     );
+
+    UserJpaEntity findByEmail(String email);
 }

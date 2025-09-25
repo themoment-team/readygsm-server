@@ -1,12 +1,11 @@
 package team.themoment.readygsm.global.security.oauth;
 
-import lombok.Getter;
-import team.themoment.readygsm.domain.auth.entity.AuthJpaEntity;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
+import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
 
 import java.util.Map;
 
-@Getter
+// OAuthUserInfo.java
 public class OAuthUserInfo {
 
     private final String email;
@@ -19,12 +18,29 @@ public class OAuthUserInfo {
         this.attributes = attributes;
     }
 
-    public AuthJpaEntity toEntity() {
-        return AuthJpaEntity.builder()
-                .email(email)
-                .name(name)
-                .role(UserRole.USER) // 기본 권한
-                .build();
+
+
+    public String getEmail() {
+        return email;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public UserJpaEntity toEntity() {
+        return UserJpaEntity.builder()
+                .email(email)
+                .name(name)
+                .role(UserRole.USER)
+                .build();
+    }
 }
+
+
+
+

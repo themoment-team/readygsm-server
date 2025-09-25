@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class AuthResponse {
     private Long userId;
     private String token;
-    private LocalDateTime tokenExpiresAt;
-    private LocalDateTime tokenIssuedAt;
+    private Long tokenExpiresAt;
+    private Long tokenIssuedAt;
     private UserRole role;
 }

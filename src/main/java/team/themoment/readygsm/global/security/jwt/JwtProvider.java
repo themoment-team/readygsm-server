@@ -1,16 +1,14 @@
 package team.themoment.readygsm.global.security.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 
 import java.security.Key;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Date;
 
 @Component
@@ -20,7 +18,7 @@ public class JwtProvider {
     private final long expirationSeconds;
 
     public JwtProvider(
-            @Value("${jwt.secret}")String secret,
+            @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-seconds}") long expirationSeconds
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
@@ -46,7 +44,7 @@ public class JwtProvider {
             Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
-                    .parseClaimsJws(token); // 파싱 중 오류 나면 catch됨
+                    .parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -55,15 +53,33 @@ public class JwtProvider {
 
     public Long getUserId(String token) {
         Claims claims = parseClaims(token);
-        return Long.parseLong(claims.getSubject());
+        try {
+            return Long.parseLong(claims.getSubject());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid userId format in token", e);
+        }
     }
-
 
     public UserRole getRole(String token) {
         Claims claims = parseClaims(token);
         return UserRole.valueOf(claims.get("role", String.class));
     }
 
+    public Date getTokenExpiration(String token) {
+        return parseClaims(token).getExpiration();
+    }
+
+    public Date getTokenIssuedAt(String token) {
+        return parseClaims(token).getIssuedAt();
+    }
+
+    public LocalDateTime getTokenExpirationLocalDateTime(String token) {
+        return convertToLocalDateTime(getTokenExpiration(token));
+    }
+
+    public LocalDateTime getTokenIssuedAtLocalDateTime(String token) {
+        return convertToLocalDateTime(getTokenIssuedAt(token));
+    }
 
     private Claims parseClaims(String token) {
         return Jwts.parserBuilder()
@@ -73,8 +89,13 @@ public class JwtProvider {
                 .getBody();
     }
 
+    private LocalDateTime convertToLocalDateTime(Date date) {
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
     public long getExpirationMinutes() {
         return expirationSeconds / 60;
     }
-
 }
