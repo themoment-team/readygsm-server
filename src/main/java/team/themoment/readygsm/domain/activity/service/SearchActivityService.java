@@ -2,6 +2,7 @@ package team.themoment.readygsm.domain.activity.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsm.domain.activity.data.Activity;
@@ -25,8 +26,7 @@ public class SearchActivityService {
     ) {
         Page<Activity> searchResult = activityJpaRepository.findByNameWithPaging(
                 activityName,
-                page,
-                limit
+                PageRequest.of(page, limit)
         ).map(ActivityJpaEntity::toDto);
 
         return searchResult.getContent().stream()

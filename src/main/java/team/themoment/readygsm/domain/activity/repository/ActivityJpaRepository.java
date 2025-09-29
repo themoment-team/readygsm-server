@@ -1,6 +1,7 @@
 package team.themoment.readygsm.domain.activity.repository;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +23,6 @@ public interface ActivityJpaRepository extends JpaRepository<ActivityJpaEntity, 
             WHERE a.name LIKE %:activityName%""")
     Page<ActivityJpaEntity> findByNameWithPaging(
             String activityName,
-            int page,
-            int limit
+            Pageable pageable
     );
 }
