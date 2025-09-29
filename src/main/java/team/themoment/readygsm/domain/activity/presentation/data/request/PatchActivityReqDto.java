@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public record PatchActivityReqDto(
         @NotNull(message = "활동명은 필수입니다.") String activityName,
-        @NotNull(message = "활동 일시는 필수입니다..") LocalDate activityDate,
+        @NotNull(message = "활동 일시는 필수입니다.") LocalDate activityDate,
         @NotNull(message = "최대 활동 인원은 필수입니다.") Integer maxApplicant,
         @NotNull(message = "활동 장소는 필수입니다.") String activityPlace,
         @NotNull(message = "활동 전공은 필수입니다.") String activityMajor,
