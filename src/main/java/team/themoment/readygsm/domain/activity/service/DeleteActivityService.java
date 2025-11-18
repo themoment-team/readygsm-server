@@ -13,7 +13,7 @@ public class DeleteActivityService {
 
     private final ActivityJpaRepository activityJpaRepository;
 
-    public void deleteActivity(
+    public void execute(
             final Long activityId
     ) {
         activityJpaRepository.findById(activityId)

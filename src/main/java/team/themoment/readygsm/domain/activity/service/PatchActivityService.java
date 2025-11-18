@@ -17,7 +17,7 @@ public class PatchActivityService {
 
     private final ActivityJpaRepository activityJpaRepository;
 
-    public PatchActivityResDto editActivity(
+    public PatchActivityResDto execute(
             final PatchActivityReqDto patchActivityReqDto,
             final Long activityId
     ) {

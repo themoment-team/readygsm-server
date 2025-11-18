@@ -16,7 +16,7 @@ public class ViewActivityService {
 
     private final ActivityJpaRepository activityJpaRepository;
 
-    public ViewActivityResDto viewActivity(
+    public ViewActivityResDto execute(
             final Long activityId
     ) {
         Activity foundActivity = activityJpaRepository.findById(activityId)

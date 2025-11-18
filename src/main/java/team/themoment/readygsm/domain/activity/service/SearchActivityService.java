@@ -19,7 +19,7 @@ public class SearchActivityService {
 
     private final ActivityJpaRepository activityJpaRepository;
 
-    public List<SearchActivityResDto> searchActivity(
+    public List<SearchActivityResDto> execute(
             final String activityName,
             final int page,
             final int limit

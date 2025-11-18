@@ -36,7 +36,7 @@ public class ActivityController {
     public ViewActivityResDto viewActivity(
             @PathVariable("activityId") Long activityId
     ) {
-        return viewActivityService.viewActivity(activityId);
+        return viewActivityService.execute(activityId);
     }
 
     @Operation(summary = "활동 검색", description = "활동 이름으로 활동을 검색합니다.")
@@ -46,7 +46,7 @@ public class ActivityController {
             @RequestParam(required = false) int page,
             @RequestParam(required = false) int limit
     ) {
-        return searchActivityService.searchActivity(name, page, limit);
+        return searchActivityService.execute(name, page, limit);
     }
 
     @Operation(summary = "활동 추가", description = "활동을 추가합니다.")
@@ -54,7 +54,7 @@ public class ActivityController {
     public PostActivityResDto postActivity(
             @RequestBody @Valid PostActivityReqDto postActivityReqDto
     ) {
-        return postActivityService.postActivity(postActivityReqDto);
+        return postActivityService.execute(postActivityReqDto);
     }
 
     @Operation(summary = "활동 수정", description = "활동을 수정합니다.")
@@ -63,7 +63,7 @@ public class ActivityController {
             @RequestBody @Valid PatchActivityReqDto patchActivityReqDto,
             @PathVariable Long activityId
     ) {
-        return patchActivityService.editActivity(patchActivityReqDto, activityId);
+        return patchActivityService.execute(patchActivityReqDto, activityId);
     }
 
     @Operation(summary = "활동 삭제", description = "활동 id로 활동을 삭제합니다.")
@@ -76,7 +76,7 @@ public class ActivityController {
     public CommonApiResponse deleteActivity(
             @PathVariable Long activityId
     ) {
-        deleteActivityService.deleteActivity(activityId);
+        deleteActivityService.execute(activityId);
         return CommonApiResponse.success("활동이 삭제되었습니다.");
     }
 }

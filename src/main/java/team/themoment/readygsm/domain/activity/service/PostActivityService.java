@@ -15,7 +15,7 @@ import team.themoment.readygsm.domain.activity.repository.ActivityJpaRepository;
 public class PostActivityService {
     private final ActivityJpaRepository activityJpaRepository;
 
-    public PostActivityResDto postActivity(
+    public PostActivityResDto execute(
             final PostActivityReqDto reqDto
     ) {
         Activity savedActivity = activityJpaRepository.save(
