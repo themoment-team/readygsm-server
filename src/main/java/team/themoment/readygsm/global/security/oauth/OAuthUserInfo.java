@@ -1,11 +1,12 @@
 package team.themoment.readygsm.global.security.oauth;
 
+import lombok.Getter;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
 
 import java.util.Map;
 
-// OAuthUserInfo.java
+@Getter
 public class OAuthUserInfo {
 
     private final String email;
@@ -20,18 +21,6 @@ public class OAuthUserInfo {
 
 
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
     public UserJpaEntity toEntity() {
         return UserJpaEntity.builder()
                 .email(email)
@@ -40,7 +29,4 @@ public class OAuthUserInfo {
                 .build();
     }
 }
-
-
-
 
