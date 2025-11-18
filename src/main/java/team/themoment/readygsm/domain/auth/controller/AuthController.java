@@ -19,6 +19,7 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<AuthResponse> authorizeWithCode(@RequestBody SignInReqDto request) {
+        // SignInService의 변경된 메서드 이름(authenticateWithCode) 사용
         AuthResponse response = authService.authenticateWithCode(request.getCode());
         return ResponseEntity.ok(response);
     }

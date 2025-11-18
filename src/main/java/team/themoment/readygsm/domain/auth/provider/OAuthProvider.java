@@ -1,8 +1,9 @@
 package team.themoment.readygsm.domain.auth.provider;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -15,31 +16,32 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OAuthProvider {
 
-    @Value("${CLIENTS_ID}")
-    private String clientId;
-
-    @Value("${CLIENTS_PASSWORD}")
-    private String clientSecret;
-
-    @Value("${oauth.google.redirect-uri}")
-    private String redirectUri;
 
     private final RestTemplate restTemplate;
+
+    private final ClientRegistrationRepository clientRegistrationRepository;
+
+    private static final String PROVIDER_ID = "google";
 
     public OAuthUserInfo getUserInfo(String code) {
         String accessToken = getAccessToken(code);
         Map<String, Object> userAttributes = getUserAttributes(accessToken);
-
         String email = (String) userAttributes.get("email");
         String name = (String) userAttributes.get("name");
 
-
         return new OAuthUserInfo(userAttributes);
-
     }
 
     private String getAccessToken(String code) {
-        String tokenUrl = "https://oauth2.googleapis.com/token";
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(PROVIDER_ID);
+        if (clientRegistration == null) {
+            throw new IllegalStateException("ClientRegistration for " + PROVIDER_ID + " not found.");
+        }
+
+        String clientId = clientRegistration.getClientId();
+        String clientSecret = clientRegistration.getClientSecret();
+        String redirectUri = clientRegistration.getRedirectUri();
+        String tokenUrl = clientRegistration.getProviderDetails().getTokenUri();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -52,7 +54,7 @@ public class OAuthProvider {
                 .queryParam("grant_type", "authorization_code")
                 .build()
                 .toUriString()
-                .substring(1); // 맨 앞에 붙는 ? 제거
+                .substring(1);
 
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
@@ -72,7 +74,12 @@ public class OAuthProvider {
     }
 
     private Map<String, Object> getUserAttributes(String accessToken) {
-        String userInfoUrl = "https://www.googleapis.com/oauth2/v2/userinfo";
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(PROVIDER_ID);
+        if (clientRegistration == null) {
+            throw new IllegalStateException("ClientRegistration for " + PROVIDER_ID + " not found.");
+        }
+
+        String userInfoUrl = clientRegistration.getProviderDetails().getUserInfoEndpoint().getUri();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
