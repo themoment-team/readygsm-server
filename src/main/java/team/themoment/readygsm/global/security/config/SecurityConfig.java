@@ -19,7 +19,6 @@ import team.themoment.readygsm.global.security.oauth.CustomOauth2UserService;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
-    private final CustomOauth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,10 +32,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/**",
-                                "/auth/**",
-                                "/login/**",
-                                "/token"
+                                "/api/v1/auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
