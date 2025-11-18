@@ -19,7 +19,7 @@ public class DeleteReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
     private final ActivityJpaRepository activityJpaRepository;
 
-    public void deleteReservation(Long reservationId) {
+    public void execute(Long reservationId) {
         // TODO:여기에 현재 로그인된 사용자의 user_id가 들어가도록 수정 필요
         // 활동 인원 감소와 예약 삭제 기능 구현
         Long userId = 1L;

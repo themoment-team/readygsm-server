@@ -24,7 +24,7 @@ public class PostUserReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
     private final UserJpaRepository userJpaRepository;
 
-    public PostUserReservationResDto postUserReservation(
+    public PostUserReservationResDto execute(
             PostReservationReqDto reqDto,
             Long activityId,
             Long userId

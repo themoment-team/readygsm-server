@@ -40,7 +40,7 @@ public class ReservationController {
             @RequestParam(defaultValue = "0",required = false) int page,
             @RequestParam(defaultValue = "10",required = false) int limit
     ) {
-        return searchReservationService.searchReservation(
+        return searchReservationService.execute(
                 activityName,
                 applicantName,
                 phoneNumber,
@@ -53,7 +53,7 @@ public class ReservationController {
     public PostReservationResDto postReservation(
             @RequestBody @Valid PostReservationReqDto reqDto,
             @PathVariable("activityId") Long activityId) {
-        return postReservationService.PostReservation(activityId, reqDto);
+        return postReservationService.execute(activityId, reqDto);
     }
 
     @Operation(summary = "특정 사용자 예약 추가", description = "지정된 사용자 ID를 이용해 사용자의 예약을 생성합니다.")
@@ -62,7 +62,7 @@ public class ReservationController {
             @RequestBody @Valid PostReservationReqDto reqDto,
             @PathVariable("activityId") Long activityId,
             @PathVariable("userId") Long userId) {
-        return postUserReservationService.postUserReservation(
+        return postUserReservationService.execute(
                         reqDto, activityId, userId
         );
     }
@@ -76,7 +76,7 @@ public class ReservationController {
     @DeleteMapping("/{reservationId}")
     public CommonApiResponse deleteReservation(
             @PathVariable("reservationId") Long reservationId) {
-        deleteReservationService.deleteReservation(reservationId);
+        deleteReservationService.execute(reservationId);
         return CommonApiResponse.success("예약이 취소되었습니다.");
     }
 }

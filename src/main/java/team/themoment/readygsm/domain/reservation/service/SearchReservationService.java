@@ -19,7 +19,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class SearchReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
-    public List<SearchReservationResDto> searchReservation(
+    public List<SearchReservationResDto> execute(
             String activityName,
             String applicantName,
             String phoneNumber,

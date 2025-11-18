@@ -22,7 +22,7 @@ public class PostReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
     private final UserJpaRepository userJpaRepository;
 
-    public PostReservationResDto PostReservation(
+    public PostReservationResDto execute(
             Long activityId,
             PostReservationReqDto reqDto) {
         Activity activity = activityJpaRepository.findById(activityId)
