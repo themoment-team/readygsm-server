@@ -32,11 +32,16 @@ public class OAuthProvider {
         return new OAuthUserInfo(userAttributes);
     }
 
-    private String getAccessToken(String code) {
+    private ClientRegistration getClientRegistration() {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(PROVIDER_ID);
         if (clientRegistration == null) {
             throw new IllegalStateException("ClientRegistration for " + PROVIDER_ID + " not found.");
         }
+        return clientRegistration;
+    }
+
+    private String getAccessToken(String code) {
+        ClientRegistration clientRegistration = getClientRegistration();
 
         String clientId = clientRegistration.getClientId();
         String clientSecret = clientRegistration.getClientSecret();
@@ -74,10 +79,7 @@ public class OAuthProvider {
     }
 
     private Map<String, Object> getUserAttributes(String accessToken) {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(PROVIDER_ID);
-        if (clientRegistration == null) {
-            throw new IllegalStateException("ClientRegistration for " + PROVIDER_ID + " not found.");
-        }
+        ClientRegistration clientRegistration = getClientRegistration();
 
         String userInfoUrl = clientRegistration.getProviderDetails().getUserInfoEndpoint().getUri();
 
@@ -101,7 +103,4 @@ public class OAuthProvider {
         return userAttributes;
     }
 
-    private String determineDefaultRole() {
-        return "USER";
-    }
 }
