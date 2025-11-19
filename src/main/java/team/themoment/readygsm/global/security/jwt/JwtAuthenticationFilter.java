@@ -2,7 +2,6 @@ package team.themoment.readygsm.global.security.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,6 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
-        return path.startsWith("/api/v1/auth/") || path.startsWith("/auth/");
+
+        boolean isAuthApi = path.startsWith("/api/v1/auth/") || path.startsWith("/auth/");
+
+        boolean isOAuthStart = path.startsWith("/oauth2/authorization/");
+
+        boolean isOAuthRedirect = path.startsWith("/login/oauth2/code/");
+
+        return isAuthApi || isOAuthStart || isOAuthRedirect;
     }
 }

@@ -1,5 +1,6 @@
 package team.themoment.readygsm.global.security.oauth;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 
-
+@Getter
 public class CustomOAuth2User extends DefaultOAuth2User {
 
     private final Long userId;
@@ -31,20 +32,4 @@ public class CustomOAuth2User extends DefaultOAuth2User {
         this.role = role;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public UserRole getRole() {
-        return role;
-    }
 }
-
