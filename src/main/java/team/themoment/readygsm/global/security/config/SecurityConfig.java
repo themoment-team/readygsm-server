@@ -11,7 +11,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import team.themoment.readygsm.global.security.jwt.JwtAuthenticationFilter;
 import team.themoment.readygsm.global.security.jwt.JwtProvider;
-import team.themoment.readygsm.global.security.oauth.CustomOauth2UserService;
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +18,7 @@ import team.themoment.readygsm.global.security.oauth.CustomOauth2UserService;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,10 +32,15 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/**"
+                                "/",
+                                "/api/v1/auth/**",
+                                "/oauth2/authorization/**",
+                                "/login/oauth2/code/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+
+
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class
