@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 
-import java.time.LocalDateTime;
 
 @Builder
 @Getter
