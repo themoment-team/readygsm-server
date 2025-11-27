@@ -7,10 +7,13 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import team.themoment.readygsm.global.error.exception.ExpectedException;
 import team.themoment.readygsm.global.security.oauth.OAuthUserInfo;
 
 
 import java.util.Map;
+
+import static team.themoment.readygsm.global.error.ErrorCode.CLIENT_REGISTRATION_NOT_FOUND;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ public class OAuthProvider {
     private ClientRegistration getClientRegistration() {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(PROVIDER_ID);
         if (clientRegistration == null) {
-            throw new IllegalStateException("ClientRegistration for " + PROVIDER_ID + " not found.");
+            throw new ExpectedException(CLIENT_REGISTRATION_NOT_FOUND);
         }
         return clientRegistration;
     }
