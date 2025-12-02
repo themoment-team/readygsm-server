@@ -1,19 +1,13 @@
 package team.themoment.readygsm.domain.user.repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
-import java.util.Optional;
-import team.themoment.readygsm.domain.user.data.constant.UserRole;
-import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
-
 @Repository
 public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
     @Query("SELECT u FROM UserJpaEntity u WHERE " +
