@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.themoment.readygsm.domain.activity.entity.ActivityJpaEntity;
+import team.themoment.readygsm.domain.reservation.data.Reservation;
 import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
 
 @Table(name = "reservation")
@@ -37,4 +38,18 @@ public class ReservationJpaEntity {
     private Integer studentNumber;
     @Column(name="reservation_applicant_name", nullable = false)
     private String applicantName;
+
+    public Reservation toDto() {
+        return Reservation.builder()
+                .id(id)
+                .activityId(activity.toDto())
+                .userId(user.toDto())
+                .phoneNumber(phoneNumber)
+                .schoolName(schoolName)
+                .grade(grade)
+                .classNumber(classNumber)
+                .studentNumber(studentNumber)
+                .applicantName(applicantName)
+                .build();
+    }
 }

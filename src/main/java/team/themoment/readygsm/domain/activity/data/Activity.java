@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
 import team.themoment.readygsm.domain.activity.entity.ActivityJpaEntity;
+import team.themoment.readygsm.domain.activity.exception.ActivityFullException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,5 +42,12 @@ public class Activity {
                 .applicationStart(applicationStart)
                 .applicationEnd(applicationEnd)
                 .build();
+    }
+
+    public void increaseActivityApplicant() {
+        if(this.currentApplicant >= this.maxApplicant) {
+            throw new ActivityFullException();
+        }
+        this.currentApplicant++;
     }
 }
