@@ -19,6 +19,12 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+  profiles:
+    include: oauth
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-seconds: ${JWT_EXPIRATION_SECONDS:86400}
 
 springdoc:
   api-docs:

@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import team.themoment.readygsm.domain.user.data.constant.UserRole;
 import team.themoment.readygsm.domain.user.entity.UserJpaEntity;
-
 @Repository
 public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
     @Query("SELECT u FROM UserJpaEntity u WHERE " +
@@ -21,4 +20,6 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, Long> {
             @Param("role") UserRole role,
             Pageable pageable
     );
+
+    UserJpaEntity findByEmail(String email);
 }
