@@ -23,7 +23,7 @@ spring:
     include: oauth
 
 jwt:
-  secret: ${JWT_SECRET:readygsmsecretkasfnksankanvrievn03vn0vfasfkasfqjf40f023f203h3ig05gey}
+  secret: ${JWT_SECRET}
   expiration-seconds: ${JWT_EXPIRATION_SECONDS:86400}
 
 springdoc:
