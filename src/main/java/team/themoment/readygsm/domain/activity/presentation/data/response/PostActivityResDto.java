@@ -1,4 +1,4 @@
-package team.themoment.readygsm.domain.reservation.presentation.data;
+package team.themoment.readygsm.domain.activity.presentation.data.response;
 
 import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
 import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
@@ -6,7 +6,7 @@ import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public record SearchReservationActivityDto(
+public record PostActivityResDto(
         Long activityId,
         String activityName,
         LocalDate activityDate,

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import team.themoment.readygsm.domain.activity.data.Activity;
 import team.themoment.readygsm.domain.activity.data.constant.ActivityType;
+import team.themoment.readygsm.domain.activity.presentation.data.request.PatchActivityReqDto;
+import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,8 +26,6 @@ public class ActivityJpaEntity {
     private Long id;
     @Column(name = "activity_name", nullable = false)
     private String name;
-    @Column(name = "activity_image")
-    private String image;
     @Column(name = "activity_current_applicant", columnDefinition = "integer default 0")
     private Integer currentApplicant;
     @Column(name = "activity_max_applicant")
@@ -48,7 +48,6 @@ public class ActivityJpaEntity {
         return Activity.builder()
                 .id(id)
                 .name(name)
-                .image(image)
                 .currentApplicant(currentApplicant)
                 .maxApplicant(maxApplicant)
                 .type(type)
@@ -58,5 +57,32 @@ public class ActivityJpaEntity {
                 .applicationStart(applicationStart)
                 .applicationEnd(applicationEnd)
                 .build();
+    }
+
+    public void update(PatchActivityReqDto ReqDto) {
+        this.name = ReqDto.activityName();
+        this.date = ReqDto.activityDate();
+        this.maxApplicant = ReqDto.maxApplicant();
+        this.place = ReqDto.activityPlace();
+        this.major = ReqDto.activityMajor();
+        this.applicationStart = ReqDto.applicationStart();
+        this.applicationEnd = ReqDto.applicationEnd();
+    }
+
+    public static ActivityStatus getApplicationStatus(
+            LocalDateTime applicationStart,
+            LocalDateTime applicationEnd
+    ) {
+        LocalDateTime now = LocalDateTime.now();
+        ActivityStatus status;
+
+        if(now.isBefore(applicationStart)) {
+            status = ActivityStatus.UPCOMING;
+        } else if(now.isAfter(applicationEnd)) {
+            status = ActivityStatus.CLOSED;
+        } else {
+            status = ActivityStatus.OPEN;
+        }
+        return status;
     }
 }

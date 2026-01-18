@@ -5,14 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import team.themoment.readygsm.domain.activity.entity.ActivityJpaEntity;
 import team.themoment.readygsm.domain.reservation.data.Reservation;
 import team.themoment.readygsm.domain.reservation.entity.ReservationJpaEntity;
-import team.themoment.readygsm.domain.reservation.data.constant.ActivityStatus;
 import team.themoment.readygsm.domain.reservation.presentation.data.SearchReservationActivityDto;
 import team.themoment.readygsm.domain.reservation.presentation.data.response.SearchReservationResDto;
 import team.themoment.readygsm.domain.reservation.repository.ReservationJpaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,7 +19,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class SearchReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
-    public List<SearchReservationResDto> searchReservation(
+    public List<SearchReservationResDto> execute(
             String activityName,
             String applicantName,
             String phoneNumber,
@@ -54,25 +53,11 @@ public class SearchReservationService {
                                 r.getActivityId().getMajor(),
                                 r.getActivityId().getApplicationStart(),
                                 r.getActivityId().getApplicationEnd(),
-                                getApplicationStatus(
+                                ActivityJpaEntity.getApplicationStatus(
                                         r.getActivityId().getApplicationStart(),
-                                        r.getActivityId().getApplicationEnd())
+                                        r.getActivityId().getApplicationEnd()
+                                )
                         )
                 )).toList();
-    }
-
-    // 활동 상태
-    private String getApplicationStatus(LocalDateTime startTime, LocalDateTime endTime) {
-        LocalDateTime now = LocalDateTime.now();
-        ActivityStatus status;
-
-        if(now.isBefore(startTime)) {
-            status = ActivityStatus.UPCOMING;
-        } else if(now.isAfter(endTime)) {
-            status = ActivityStatus.CLOSED;
-        } else {
-            status = ActivityStatus.OPEN;
-        }
-        return status.name();
     }
 }
