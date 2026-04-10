@@ -6,9 +6,9 @@ description: REST API design guide
 
 ## URL Design
 
-- RESTful principles: `/v1/auth/api-keys`
-- Use plural: `/students`, `/clubs`
-- Hierarchy: `/students/{id}/projects`
+- RESTful principles: `/v1/auth/login`
+- Use plural: `/students`, `/users`
+- Hierarchy: `/students/{id}/applications`
 
 ## Query Parameters
 
@@ -18,11 +18,11 @@ description: REST API design guide
 
 ## OpenAPI Documentation
 
-```kotlin
-@Operation(summary = "Create API key", description = "...")
+```java
+@Operation(summary = "학생 정보 조회", description = "...")
 @ApiResponse(responseCode = "200", description = "Success")
-@PostMapping("/api-keys")
-fun create(@Valid @RequestBody reqDto: CreateApiKeyReqDto): CommonApiResponse<ApiKeyResDto>
+@GetMapping("/students/{id}")
+public CommonApiResponse<StudentResDto> getStudent(@PathVariable Long id)
 ```
 
 ## Response Format

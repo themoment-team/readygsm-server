@@ -13,7 +13,7 @@ description: DB migration and schema change guide
 
 ## Change Order
 
-1. **Modify Entity**: `datagsm-common/.../domain/`
+1. **Modify Entity**: `team.themoment.readygsmserver.domain.{domain}.domain/`
 2. **Modify DTO**: ReqDto, ResDto
 3. **Modify Repository**: Adjust QueryDSL queries if needed
 4. **Modify Service**: Update business logic

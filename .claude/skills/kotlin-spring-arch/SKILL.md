@@ -1,8 +1,8 @@
 ---
-description: Kotlin + Spring Boot 4.0 architecture detailed guide
+description: Java + Spring Boot 4.0 architecture detailed guide
 ---
 
-# Kotlin + Spring Boot Architecture Guide
+# Java + Spring Boot Architecture Guide
 
 ## Layer Structure
 
@@ -23,55 +23,42 @@ description: Kotlin + Spring Boot 4.0 architecture detailed guide
 ### Repository
 - Role: Data access
 - JPA: Extend `JpaRepository`
-- QueryDSL: Complex queries
 - Avoid N+1: Fetch Join, `@EntityGraph`
 
 ## Transaction Strategy
 
 ### Read-only Optimization
-```kotlin
+```java
 @Transactional(readOnly = true)
-fun findApiKeys(): List<ApiKeyResDto> {
-    return repository.findAll()
-        .map { it.toResDto() }
+public List<StudentResDto> findStudents() {
+    return repository.findAll().stream()
+        .map(StudentResDto::from)
+        .toList();
 }
 ```
 
 ### N+1 Problem Resolution
-```kotlin
+```java
 // ❌ N+1 occurs
-repository.findAll() // 1 query
-entity.relatedEntity // N queries
+repository.findAll(); // 1 query
+entity.getRelatedEntities(); // N queries
 
 // ✅ Fetch Join
-@Query("SELECT e FROM Entity e JOIN FETCH e.relatedEntity")
-fun findAllWithRelated(): List<Entity>
+@Query("SELECT e FROM Entity e JOIN FETCH e.relatedEntities")
+List<Entity> findAllWithRelated();
 ```
 
 ## Exception Handling
 
-### Custom Exception
-```kotlin
-class ApiKeyNotFoundException : ExpectedException(
-    status = HttpStatus.NOT_FOUND,
-    message = "API key not found"
-)
+```java
+throw new ExpectedException("학생을 찾을 수 없습니다", HttpStatus.NOT_FOUND);
 ```
-
-### Global Handler
-See `datagsm-common/.../global/common/error/GlobalExceptionHandler.kt`
 
 ## DTO Conversion Pattern
 
-```kotlin
-// Entity → ResDto
-fun Entity.toResDto() = EntityResDto(
-    id = this.id,
-    name = this.name
-)
-
-// ReqDto → Entity
-fun EntityReqDto.toEntity() = Entity(
-    name = this.name
-)
+```java
+// Entity → ResDto (static factory)
+public static StudentResDto from(Student student) {
+    return new StudentResDto(student.getId(), student.getName());
+}
 ```
