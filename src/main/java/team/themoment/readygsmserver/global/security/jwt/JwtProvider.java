@@ -46,16 +46,11 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String getSubject(String token) {
-        return getClaims(token).getSubject();
-    }
-
-    public boolean isValid(String token) {
+    public String getSubjectIfValid(String token) {
         try {
-            getClaims(token);
-            return true;
+            return getClaims(token).getSubject();
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            return null;
         }
     }
 
