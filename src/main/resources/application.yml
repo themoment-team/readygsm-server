@@ -41,6 +41,10 @@ jwt:
   access-token-expiration: 3600000        # 1시간
   refresh-token-expiration: 1209600000    # 14일
 
+oauth2:
+  success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
+  failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:/}
+
 sdk:
   logging:
     enabled: true

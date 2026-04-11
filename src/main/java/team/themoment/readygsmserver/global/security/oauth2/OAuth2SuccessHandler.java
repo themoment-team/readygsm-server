@@ -17,6 +17,7 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
+    private final OAuth2Properties oAuth2Properties;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -32,7 +33,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(createCookie("access_token", accessToken));
         response.addCookie(createCookie("refresh_token", refreshToken));
 
-        getRedirectStrategy().sendRedirect(request, response, "/");
+        getRedirectStrategy().sendRedirect(request, response, oAuth2Properties.successRedirectUrl());
     }
 
     private Cookie createCookie(String name, String value) {
