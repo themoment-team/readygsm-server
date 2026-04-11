@@ -12,6 +12,7 @@ git branch --show-current
 git log master..HEAD --oneline
 git diff master...HEAD --stat
 git diff master...HEAD
+find src/main/java -mindepth 5 -maxdepth 5 -type d | sed 's|.*domain/||'
 ```
 
 Read `.github/PULL_REQUEST_TEMPLATE.md` for the PR template structure.
@@ -20,21 +21,15 @@ Read `.github/PULL_REQUEST_TEMPLATE.md` for the PR template structure.
 
 This project uses the following PR title format: `[scope] description`
 
-**Available Scopes:**
-- **Primary**: Domain names - auth, student, user, oauth
-- **Cross-cutting concerns only**: global
-- **Others**: ci/cd
-
 **Scope Selection Rule:**
-- Use domain names by default for feature-specific changes
-- Only use global when changes affect multiple domains or cross-cutting concerns (e.g., config, security, common utilities)
+- Use domain names by default for feature-specific changes (discover from `src/main/java/.../domain/` directory structure)
+- Only use `global` when changes affect multiple domains or cross-cutting concerns (e.g., config, security, common utilities)
+- Use `ci/cd` for build/deployment changes
 
 **Recent PR Title Examples:**
 - `[global] 공통 예외 처리 로직 추가`
-- `[global] Swagger 설정 수정`
 - `[auth] JWT 토큰 발급 및 갱신 기능 구현`
 - `[ci/cd] GitHub Actions 빌드 파이프라인 추가`
-- `[student] 학생 정보 조회 API 구현`
 
 ## Your task
 
