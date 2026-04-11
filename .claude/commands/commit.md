@@ -10,7 +10,6 @@ Create Git commits following these rules:
     - Scopes:
         - **Primary**: Domain names (auth, student, user, oauth)
         - **Cross-cutting concerns only**: global
-        - Use domain names by default. Only use module names when changes affect multiple modules or cross-cutting concerns.
     - Description: Korean, no period, do NOT use any of these endings: "~한다/~된다", "~하기/~하기 위해", "~합니다/~됩니다", "~했습니다"
     - Use concise verb stem or noun phrase: e.g., "엔티티 필드 추가", "트랜잭션 롤백 방지", "로직 개선"
 - Use subject line only (no commit body)
@@ -20,7 +19,7 @@ Create Git commits following these rules:
 
 ## Scope Selection Guide
 
-**Priority**: Domain name > Module name
+**Priority**: Domain name > global
 
 **Domain names (Primary)**:
 

@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Read, Write
+allowed-tools: Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(find:*), Read, Write
 description: Generate PR body and title suggestions
 ---
 
@@ -10,19 +10,16 @@ description: Generate PR body and title suggestions
 - File changes stats from master: !`git diff master...HEAD --stat`
 - Detailed changes from master: !`git diff master...HEAD`
 - PR template: Read `.github/PULL_REQUEST_TEMPLATE.md` file
+- Available domains: !`find src/main/java -mindepth 5 -maxdepth 5 -type d | sed 's|.*domain/||'`
 
 ## PR Title Convention
 
 This project uses the following PR title format: `[scope] description`
 
-**Available Scopes:**
-- **Primary**: Domain names - auth, student, user, oauth
-- **Cross-cutting concerns only**: global
-- **Others**: ci/cd
-
 **Scope Selection Rule:**
-- Use domain names by default for feature-specific changes
-- Only use global when changes affect multiple domains or cross-cutting concerns (e.g., config, security, common utilities)
+- Use domain names by default for feature-specific changes (discover from `src/main/java/.../domain/` directory structure above)
+- Only use `global` when changes affect multiple domains or cross-cutting concerns (e.g., config, security, common utilities)
+- Use `ci/cd` for build/deployment changes
 
 **Recent PR Title Examples:**
 - `[global] 공통 예외 처리 로직 추가`
