@@ -1,9 +1,9 @@
 ---
 name: kotlin-spring-arch
-description: Kotlin + Spring Boot 4.0 architecture detailed guide for this project
+description: Java + Spring Boot 4.0 architecture detailed guide for this project
 ---
 
-# Kotlin + Spring Boot Architecture Guide
+# Java + Spring Boot Architecture Guide
 
 ## Layer Structure
 
@@ -15,7 +15,6 @@ description: Kotlin + Spring Boot 4.0 architecture detailed guide for this proje
 
 ### Service
 - Role: Business logic, transaction management
-- Pattern: interface + implementation
 - Transaction:
   - Read: `@Transactional(readOnly = true)`
   - Write: `@Transactional`
@@ -24,39 +23,39 @@ description: Kotlin + Spring Boot 4.0 architecture detailed guide for this proje
 ### Repository
 - Role: Data access
 - JPA: Extend `JpaRepository`
-- QueryDSL: Complex queries
 - Avoid N+1: Fetch Join, `@EntityGraph`
 
 ## Transaction Strategy
 
 ### Read-only Optimization
-```kotlin
+```java
 @Transactional(readOnly = true)
-fun findApiKeys(): List<ApiKeyResDto> {
-    return repository.findAll()
-        .map { it.toResDto() }
+public List<StudentResDto> findStudents() {
+    return repository.findAll().stream()
+            .map(StudentResDto::from)
+            .toList();
 }
 ```
 
 ### N+1 Problem Resolution
-```kotlin
+```java
 // ❌ N+1 occurs
-repository.findAll() // 1 query
-entity.relatedEntity // N queries
+repository.findAll(); // 1 query
+entity.getRelatedEntity(); // N queries
 
 // ✅ Fetch Join
 @Query("SELECT e FROM Entity e JOIN FETCH e.relatedEntity")
-fun findAllWithRelated(): List<Entity>
+List<Entity> findAllWithRelated();
 ```
 
 ## Exception Handling
 
 ### Custom Exception
 Do NOT create subclasses of `ExpectedException`. Instantiate it directly:
-```kotlin
-studentRepository.findById(id).orElseThrow {
-    ExpectedException("Student not found. studentId: $id", HttpStatus.NOT_FOUND)
-}
+```java
+studentRepository.findById(id).orElseThrow(() ->
+    new ExpectedException("Student not found. studentId: " + id, HttpStatus.NOT_FOUND)
+);
 ```
 
 ### Global Handler
@@ -64,15 +63,14 @@ See `src/main/java/team/themoment/readygsmserver/global/` — the SDK's built-in
 
 ## DTO Conversion Pattern
 
-```kotlin
-// Entity → ResDto
-fun Entity.toResDto() = EntityResDto(
-    id = this.id,
-    name = this.name
-)
+```java
+// Entity → ResDto (static factory)
+public static StudentResDto from(Student student) {
+    return new StudentResDto(student.getId(), student.getName());
+}
 
 // ReqDto → Entity
-fun EntityReqDto.toEntity() = Entity(
-    name = this.name
-)
+public Student toEntity() {
+    return new Student(this.name);
+}
 ```

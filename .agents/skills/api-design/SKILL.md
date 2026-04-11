@@ -7,9 +7,9 @@ description: REST API design guide for this project
 
 ## URL Design
 
-- RESTful principles: `/v1/auth/api-keys`
-- Use plural: `/students`, `/clubs`
-- Hierarchy: `/students/{id}/projects`
+- RESTful principles: `/v1/auth/token`, `/v1/students`
+- Use plural nouns: `/students`, `/users`
+- Hierarchy: `/students/{id}/records`
 
 ## Query Parameters
 
@@ -19,14 +19,16 @@ description: REST API design guide for this project
 
 ## OpenAPI Documentation
 
-```kotlin
-@Operation(summary = "Create API key", description = "...")
-@ApiResponse(responseCode = "200", description = "Success")
-@PostMapping("/api-keys")
-fun create(@Valid @RequestBody reqDto: CreateApiKeyReqDto): ApiKeyResDto
+```java
+@Operation(summary = "학생 정보 조회", description = "학생 ID로 정보를 조회합니다.")
+@ApiResponse(responseCode = "200", description = "조회 성공")
+@GetMapping("/{id}")
+public StudentResDto findStudent(@PathVariable Long id) {
+    return studentService.findById(id);
+}
 ```
 
 ## Response Format
 
-- Success: `CommonApiResponse(data = ...)`
-- Error: `ExpectedException` → Global Handler
+- Success: Handled automatically by the-sdk (`CommonApiResponse` wrapper)
+- Error: Throw `ExpectedException(message, HttpStatus)` → SDK GlobalExceptionHandler processes it
