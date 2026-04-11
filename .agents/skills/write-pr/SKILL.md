@@ -1,5 +1,5 @@
 ---
-name: pr-draft
+name: write-pr
 description: Generate PR body and title suggestions based on commits diff from master branch
 ---
 
