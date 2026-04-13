@@ -32,8 +32,8 @@ public class ApplicationJpaEntity {
     @Column(name = "grade", nullable = false)
     private Integer grade;
 
-    @Column(name = "class", nullable = false)
-    private Integer classNum;
+    @Column(name = "class_number", nullable = false)
+    private Integer classNumber;
 
     @Column(name = "number", nullable = false)
     private Integer number;
