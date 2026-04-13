@@ -17,7 +17,7 @@ public class UserJpaEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "email", nullable = false, length = 50)
+    @Column(name = "email", nullable = false, length = 255)
     private String email;
 
     @Enumerated(EnumType.STRING)
