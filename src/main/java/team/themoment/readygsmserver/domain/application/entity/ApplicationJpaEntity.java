@@ -6,7 +6,8 @@ import team.themoment.readygsmserver.domain.activity.entity.ActivityJpaEntity;
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 
 @Entity
-@Table(name = "tb_application")
+@Table(name = "tb_application", uniqueConstraints = {@UniqueConstraint(columnNames =
+        {"activity_id", "user_id"})})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
