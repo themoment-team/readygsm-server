@@ -30,12 +30,12 @@ public class ActivityJpaEntity {
     @Column(name = "max_applicant", nullable = false)
     private Integer maxApplicant;
 
-    @Column(name = "activity_date")
+    @Column(name = "activity_date", nullable = false)
     private LocalDate activityDate;
 
-    @Column(name = "start")
+    @Column(name = "start", nullable = false)
     private LocalDate start;
 
-    @Column(name = "end")
+    @Column(name = "end", nullable = false)
     private LocalDate end;
 }
