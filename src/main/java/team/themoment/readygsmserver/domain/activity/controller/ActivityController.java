@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import team.themoment.readygsmserver.domain.activity.dto.request.ActivityReqDto;
 import team.themoment.readygsmserver.domain.activity.dto.response.ActivityResDto;
 
+import java.util.List;
+
 @RestController
 @Tag(name = "Activity", description = "활동 API")
 @RequestMapping("/api/v1/activity")
@@ -20,7 +22,7 @@ public class ActivityController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     @GetMapping
-    public ActivityResDto queryAllActivities() {
+    public List<ActivityResDto> queryAllActivities() {
         return null;
     }
 
