@@ -1,0 +1,59 @@
+package team.themoment.readygsmserver.global.security.jwt;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+public class JwtProvider {
+
+    private final SecretKey secretKey;
+    private final long accessTokenExpiration;
+    private final long refreshTokenExpiration;
+
+    public JwtProvider(JwtProperties jwtProperties) {
+        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.secret()));
+        this.accessTokenExpiration = jwtProperties.accessTokenExpiration();
+        this.refreshTokenExpiration = jwtProperties.refreshTokenExpiration();
+    }
+
+    public String createAccessToken(String subject) {
+        return createToken(subject, accessTokenExpiration);
+    }
+
+    public String createRefreshToken(String subject) {
+        return createToken(subject, refreshTokenExpiration);
+    }
+
+    private String createToken(String subject, long expiration) {
+        Date now = new Date();
+        return Jwts.builder()
+                .subject(subject)
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + expiration))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public String getSubjectIfValid(String token) {
+        try {
+            return getClaims(token).getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+}
