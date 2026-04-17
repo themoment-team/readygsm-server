@@ -57,7 +57,7 @@ public class ActivityController {
             @ApiResponse(responseCode = "403", description = "권한 없음"),
             @ApiResponse(responseCode = "404", description = "활동을 찾을 수 없음")
     })
-    @PatchMapping("/edit/{id}")
+    @PatchMapping("/{id}")
     public ActivityResDto editActivity(@PathVariable Long id, @RequestBody ActivityReqDto req) {
         return null;
     }
