@@ -44,7 +44,7 @@ public class ActivityController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
             @ApiResponse(responseCode = "403", description = "권한 없음")
     })
-    @PostMapping("/create")
+    @PostMapping
     public ActivityResDto createActivity(@RequestBody ActivityReqDto req) {
         return null;
     }
