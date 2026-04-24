@@ -4,30 +4,57 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import team.themoment.readygsmserver.domain.auth.dto.request.OAuthCodeRequest;
+import team.themoment.readygsmserver.domain.auth.service.OAuthAuthenticationService;
+import team.themoment.readygsmserver.global.config.GoogleOAuthProperties;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 @RestController
 @Tag(name = "Auth", description = "인증 API")
 @RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Operation(summary = "구글 로그인", description = "Google OAuth2 로그인 페이지로 리다이렉트합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "302", description = "Google 로그인 페이지로 리다이렉트")
-    })
-    @GetMapping("/login")
-    public void login() {
+    private final OAuthAuthenticationService oAuthAuthenticationService;
+    private final GoogleOAuthProperties googleOAuthProperties;
+
+    @Operation(summary = "Google OAuth 로그인 페이지로 이동", description = "Google 로그인 페이지로 리다이렉트합니다.")
+    @GetMapping("/google/redirect")
+    public void redirectToGoogle(HttpServletResponse response, HttpSession session) throws IOException {
+        String state = UUID.randomUUID().toString();
+        session.setAttribute(OAuthAuthenticationService.OAUTH2_STATE_SESSION_KEY, state);
+
+        String url = "https://accounts.google.com/o/oauth2/v2/auth"
+                + "?client_id=" + URLEncoder.encode(googleOAuthProperties.clientId(), StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(googleOAuthProperties.redirectUri(), StandardCharsets.UTF_8)
+                + "&response_type=code"
+                + "&scope=email%20profile"
+                + "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8);
+        response.sendRedirect(url);
     }
 
-    @Operation(summary = "구글 로그인 콜백", description = "Google OAuth2 인가 코드를 처리하고 JWT를 발급합니다.")
+    @Operation(summary = "OAuth 로그인", description = "OAuth Provider로부터 받은 Authorization Code로 로그인합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공 및 JWT 발급"),
-            @ApiResponse(responseCode = "400", description = "잘못된 인가 코드"),
+            @ApiResponse(responseCode = "200", description = "인증 완료"),
+            @ApiResponse(responseCode = "400", description = "잘못된 인가 코드 또는 state"),
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
-    @GetMapping("/callback")
-    public void callback() {
+    @PostMapping("/{provider}")
+    public ResponseEntity<Void> oauthLogin(
+            @PathVariable String provider,
+            @RequestBody OAuthCodeRequest request,
+            HttpServletRequest httpRequest) {
+        oAuthAuthenticationService.execute(provider, request.code(), request.state(), httpRequest);
+        return ResponseEntity.ok().build();
     }
 }
