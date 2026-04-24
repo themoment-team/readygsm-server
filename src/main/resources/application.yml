@@ -38,6 +38,8 @@ server:
   servlet:
     session:
       timeout: 3h
+      cookie:
+        same-site: strict
 
 google:
   oauth:

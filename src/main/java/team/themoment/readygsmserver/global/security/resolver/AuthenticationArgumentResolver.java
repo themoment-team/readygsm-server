@@ -29,8 +29,8 @@ public class AuthenticationArgumentResolver implements HandlerMethodArgumentReso
         if (authentication instanceof OAuth2AuthenticationToken token) {
             OAuth2User user = token.getPrincipal();
             Object id = user.getAttribute("id");
-            if (id instanceof Long memberId) {
-                return memberId;
+            if (id instanceof Number number) {
+                return number.longValue();
             }
         }
 
