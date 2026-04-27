@@ -35,11 +35,17 @@ spring:
 
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 3h
+      cookie:
+        same-site: strict
 
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: 3600000        # 1시간
-  refresh-token-expiration: 1209600000    # 14일
+google:
+  oauth:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${GOOGLE_REDIRECT_URI}
 
 oauth2:
   success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
