@@ -3,6 +3,7 @@ package team.themoment.readygsmserver.domain.auth.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,22 +19,31 @@ import team.themoment.readygsmserver.domain.user.repository.UserRepository;
 import team.themoment.readygsmserver.global.security.oauth2.OAuthProviderFactory;
 import team.themoment.readygsmserver.global.security.oauth2.provider.OAuthProvider;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OAuthAuthenticationService {
 
-    static final String OAUTH2_STATE_SESSION_KEY = "oauth2_state";
-    private static final int SESSION_TIMEOUT_SECONDS = 3 * 60 * 60;
+    private static final String OAUTH2_STATE_REDIS_PREFIX = "oauth2:state:";
+    private static final Duration OAUTH2_STATE_TTL = Duration.ofMinutes(5);
 
     private final OAuthProviderFactory oAuthProviderFactory;
     private final UserRepository userRepository;
+    private final StringRedisTemplate redisTemplate;
+
+    public String generateState() {
+        String state = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set(OAUTH2_STATE_REDIS_PREFIX + state, "1", OAUTH2_STATE_TTL);
+        return state;
+    }
 
     public void execute(String providerName, String code, String state, HttpServletRequest request) {
-        validateState(state, request);
+        validateState(state);
 
         OAuthProvider provider = oAuthProviderFactory.getProvider(providerName);
         UserAuthInfo userAuthInfo = provider.getUserAuthInfo(code);
@@ -68,22 +78,18 @@ public class OAuthAuthenticationService {
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
 
-        // 세션 고정 공격 방지: 기존 세션 무효화 후 새 세션 발급
-        request.getSession(false).invalidate();
-        HttpSession newSession = request.getSession(true);
-        newSession.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
-        newSession.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
-    }
-
-    private void validateState(String state, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            throw new IllegalStateException("OAuth2 인증 세션이 존재하지 않습니다.");
+            session = request.getSession(true);
         }
-        String savedState = (String) session.getAttribute(OAUTH2_STATE_SESSION_KEY);
-        if (savedState == null || !savedState.equals(state)) {
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+    }
+
+    private void validateState(String state) {
+        String key = OAUTH2_STATE_REDIS_PREFIX + state;
+        Boolean deleted = redisTemplate.delete(key);
+        if (deleted == null || !deleted) {
             throw new IllegalArgumentException("유효하지 않은 state 값입니다. CSRF 공격이 의심됩니다.");
         }
-        session.removeAttribute(OAUTH2_STATE_SESSION_KEY);
     }
 }
