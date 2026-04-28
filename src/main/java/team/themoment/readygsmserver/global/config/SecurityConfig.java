@@ -33,7 +33,6 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .sessionFixation().none()
                 )
                 .securityContext(secContext -> secContext
                         .securityContextRepository(securityContextRepository())

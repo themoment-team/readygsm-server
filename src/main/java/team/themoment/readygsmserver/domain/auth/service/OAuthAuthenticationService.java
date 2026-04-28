@@ -78,10 +78,11 @@ public class OAuthAuthenticationService {
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
 
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            session = request.getSession(true);
+        HttpSession oldSession = request.getSession(false);
+        if (oldSession != null) {
+            oldSession.invalidate();
         }
+        HttpSession session = request.getSession(true);
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
     }
 
