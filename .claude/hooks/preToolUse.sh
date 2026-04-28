@@ -1,9 +1,19 @@
 #!/bin/bash
-# .claude/hooks/preToolUse.sh
-# Block dangerous commands before execution
+
+INPUT=$(cat)
+
+if ! command -v jq &>/dev/null; then
+    echo "[Hook] Error: 'jq' is required but not installed." >&2
+    exit 1
+fi
+
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
 
 if [[ "$TOOL_NAME" == "Bash" ]]; then
-    COMMAND="$TOOL_PARAMS_COMMAND"
+    COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""')
+    LOG_FILE="$(cd "$(dirname "$0")/.." && pwd)/bash-log.txt"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $COMMAND" >> "$LOG_FILE"
+
     BLOCKED_PATTERNS=(
         "rm -rf /"
         "sudo rm"
@@ -15,8 +25,7 @@ if [[ "$TOOL_NAME" == "Bash" ]]; then
     )
     for pattern in "${BLOCKED_PATTERNS[@]}"; do
         if [[ "$COMMAND" =~ $pattern ]]; then
-            echo "[Hook] ✗ Blocked dangerous command: $COMMAND"
-            echo "This command is not allowed for safety reasons."
+            echo "[Hook] Blocked dangerous command: $COMMAND"
             exit 2
         fi
     done

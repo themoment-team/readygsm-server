@@ -38,3 +38,4 @@ out/
 
 ### LLM outputs ###
 PR_BODY.md
+/.claude/bash-log.txt
