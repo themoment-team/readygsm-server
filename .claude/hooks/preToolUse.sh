@@ -2,6 +2,11 @@
 
 INPUT=$(cat)
 
+if ! command -v jq &>/dev/null; then
+    echo "[Hook] Error: 'jq' is required but not installed." >&2
+    exit 1
+fi
+
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
 
 if [[ "$TOOL_NAME" == "Bash" ]]; then
