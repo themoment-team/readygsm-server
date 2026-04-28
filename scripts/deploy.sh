@@ -1,15 +1,15 @@
 #!/bin/bash
 
-cd /Users/snowykte0426/Downloads/readygsm-server
+cd "$HOME/Downloads/readygsm-server"
 
 git pull origin develop
 
 docker compose up -d
 
-pkill -f "readygsm-server" || true
+./gradlew bootJar -x test
+
+pkill -f "java -jar.*readygsm-server" || true
 
 sleep 2
 
-./gradlew bootJar -x test
-
-nohup java -jar build/libs/readygsm-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+nohup java -jar build/libs/readygsm-server-*.jar > app.log 2>&1 &
