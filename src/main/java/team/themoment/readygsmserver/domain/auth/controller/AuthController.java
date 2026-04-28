@@ -27,14 +27,20 @@ public class AuthController {
     private final GoogleOAuthProperties googleOAuthProperties;
     private final OAuth2Properties oauth2Properties;
 
-    @Operation(summary = "Google OAuth 로그인 페이지로 이동", description = "Google 로그인 페이지로 리다이렉트합니다.")
+    @Operation(summary = "Google OAuth 로그인 페이지로 이동", description = "Google 로그인 페이지로 리다이렉트합니다. redirect_uri를 지정하지 않으면 서버 기본값을 사용합니다.")
     @GetMapping("/google/redirect")
-    public void redirectToGoogle(HttpServletResponse response) throws IOException {
-        String state = oAuthAuthenticationService.generateState();
+    public void redirectToGoogle(
+            @RequestParam(required = false) String redirectUri,
+            HttpServletResponse response) throws IOException {
+        String state = oAuthAuthenticationService.generateState(redirectUri);
+
+        String resolvedRedirectUri = redirectUri != null && !redirectUri.isBlank()
+                ? redirectUri
+                : googleOAuthProperties.redirectUri();
 
         String url = UriComponentsBuilder.fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
                 .queryParam("client_id", googleOAuthProperties.clientId())
-                .queryParam("redirect_uri", googleOAuthProperties.redirectUri())
+                .queryParam("redirect_uri", resolvedRedirectUri)
                 .queryParam("response_type", "code")
                 .queryParam("scope", "email profile")
                 .queryParam("state", state)
