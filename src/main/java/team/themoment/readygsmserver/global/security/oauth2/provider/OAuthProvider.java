@@ -4,5 +4,5 @@ import team.themoment.readygsmserver.domain.auth.dto.UserAuthInfo;
 
 public interface OAuthProvider {
     String getProviderName();
-    UserAuthInfo getUserAuthInfo(String code);
+    UserAuthInfo getUserAuthInfo(String code, String redirectUri);
 }

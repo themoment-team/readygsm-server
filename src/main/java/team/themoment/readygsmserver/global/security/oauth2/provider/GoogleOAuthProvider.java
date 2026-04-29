@@ -26,12 +26,12 @@ public class GoogleOAuthProvider implements OAuthProvider {
     }
 
     @Override
-    public UserAuthInfo getUserAuthInfo(String code) {
+    public UserAuthInfo getUserAuthInfo(String code, String redirectUri) {
         GoogleTokenResponse tokenResponse = googleTokenClient.getToken(
                 code,
                 googleOAuthProperties.clientId(),
                 googleOAuthProperties.clientSecret(),
-                googleOAuthProperties.redirectUri()
+                redirectUri
         );
 
         GoogleUserInfoResponse userInfoResponse = googleUserInfoClient.getUserInfo(tokenResponse.accessToken());

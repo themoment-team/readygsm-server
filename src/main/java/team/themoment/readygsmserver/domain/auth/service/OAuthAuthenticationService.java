@@ -3,7 +3,6 @@ package team.themoment.readygsmserver.domain.auth.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,37 +15,27 @@ import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsmserver.domain.auth.dto.UserAuthInfo;
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 import team.themoment.readygsmserver.domain.user.repository.UserRepository;
+import team.themoment.readygsmserver.global.security.oauth2.OAuth2Properties;
 import team.themoment.readygsmserver.global.security.oauth2.OAuthProviderFactory;
 import team.themoment.readygsmserver.global.security.oauth2.provider.OAuthProvider;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OAuthAuthenticationService {
 
-    private static final String OAUTH2_STATE_REDIS_PREFIX = "oauth2:state:";
-    private static final Duration OAUTH2_STATE_TTL = Duration.ofMinutes(5);
-
     private final OAuthProviderFactory oAuthProviderFactory;
     private final UserRepository userRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final OAuth2Properties oauth2Properties;
 
-    public String generateState() {
-        String state = UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set(OAUTH2_STATE_REDIS_PREFIX + state, "1", OAUTH2_STATE_TTL);
-        return state;
-    }
-
-    public void execute(String providerName, String code, String state, HttpServletRequest request) {
-        validateState(state);
+    public void execute(String providerName, String code, String redirectUri, HttpServletRequest request) {
+        validateRedirectUri(redirectUri);
 
         OAuthProvider provider = oAuthProviderFactory.getProvider(providerName);
-        UserAuthInfo userAuthInfo = provider.getUserAuthInfo(code);
+        UserAuthInfo userAuthInfo = provider.getUserAuthInfo(code, redirectUri);
 
         UserJpaEntity user = userRepository
                 .findByAuthReferrerTypeAndEmail(userAuthInfo.authReferrerType(), userAuthInfo.email())
@@ -86,11 +75,12 @@ public class OAuthAuthenticationService {
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
     }
 
-    private void validateState(String state) {
-        String key = OAUTH2_STATE_REDIS_PREFIX + state;
-        Boolean deleted = redisTemplate.delete(key);
-        if (deleted == null || !deleted) {
-            throw new IllegalArgumentException("유효하지 않은 state 값입니다. CSRF 공격이 의심됩니다.");
+    private void validateRedirectUri(String redirectUri) {
+        if (redirectUri == null || redirectUri.isBlank()) {
+            throw new IllegalArgumentException("redirect_uri는 필수입니다.");
+        }
+        if (!oauth2Properties.allowedRedirectUris().contains(redirectUri)) {
+            throw new IllegalArgumentException("허용되지 않은 redirect_uri입니다: " + redirectUri);
         }
     }
 }
