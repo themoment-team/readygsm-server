@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: docker/stage/Dockerfile
+      dockerfile: docker/stage.Dockerfile
     container_name: readygsm-app
     ports:
       - "8080:8080"
