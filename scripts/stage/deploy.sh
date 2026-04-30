@@ -6,4 +6,4 @@ git pull origin develop
 
 ./gradlew bootJar -x test
 
-docker compose -f compose.yml -f compose.stage.yml up -d --build app
+docker compose -f deploy/compose.yml -f deploy/compose.stage.yml up -d --build app
