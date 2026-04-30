@@ -16,5 +16,21 @@ services:
     ports:
       - "6379:6379"
 
+  app:
+    build: .
+    container_name: readygsm-app
+    ports:
+      - "8080:8080"
+    environment:
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+    depends_on:
+      - mysql
+      - redis
+    restart: always
+
 volumes:
   mysql-data:
