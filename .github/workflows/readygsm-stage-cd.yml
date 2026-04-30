@@ -22,7 +22,7 @@ jobs:
             export GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
             export GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
             export GOOGLE_REDIRECT_URI=$GOOGLE_REDIRECT_URI
-            bash $HOME/Downloads/readygsm-server/scripts/deploy.sh
+            bash $HOME/Downloads/readygsm-server/scripts/stage/deploy.sh
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
