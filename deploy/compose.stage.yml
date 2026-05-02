@@ -5,4 +5,4 @@ services:
       dockerfile: docker/stage.Dockerfile
     container_name: readygsm-app
     ports:
-      - "8080:8080"
+      - "10101:8080"
