@@ -42,6 +42,7 @@ spring:
 server:
   port: 8080
   servlet:
+    context-path: /ready-gsm
     session:
       timeout: 3h
 
