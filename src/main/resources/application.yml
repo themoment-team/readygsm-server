@@ -82,4 +82,4 @@ sdk:
     enabled: true
     title: "ReadyGSM API"
     paths-to-match:
-      - "/v1/**"
+      - "/api/v1/**"
