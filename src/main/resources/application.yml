@@ -60,6 +60,12 @@ oauth2:
     - "https://stage.readygsm.kr/oauth/callback"
     - "https://www.readygsm.kr/oauth/callback"
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
+
 sdk:
   logging:
     enabled: true
@@ -82,3 +88,4 @@ sdk:
     title: "ReadyGSM API"
     paths-to-match:
       - "/v1/**"
+      - "/ready-gsm/v1/**"
