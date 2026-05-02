@@ -1,21 +1,4 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: readygsm-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: readygsm
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-
-  redis:
-    image: redis:7.0
-    container_name: readygsm-redis
-    ports:
-      - "6379:6379"
-
   app:
     environment:
       - MYSQL_HOST=mysql
@@ -24,9 +7,11 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
     depends_on:
-      - mysql
       - redis
     restart: always
+    networks:
+      - readygsm-net
 
-volumes:
-  mysql-data:
+networks:
+  readygsm-net:
+    driver: bridge
