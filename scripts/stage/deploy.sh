@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH=$PATH:/usr/local/bin
+
 cd "$HOME/Downloads/readygsm-server"
 
 ./gradlew bootJar -x test
