@@ -63,6 +63,9 @@ oauth2:
 
 springdoc:
   paths-to-match: "/api/**"
+  group-configs:
+    - group: API
+      paths-to-match: "/api/**"
 
 sdk:
   logging:
