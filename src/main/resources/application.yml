@@ -61,6 +61,9 @@ oauth2:
     - "https://stage.readygsm.kr/oauth/callback"
     - "https://www.readygsm.kr/oauth/callback"
 
+springdoc:
+  paths-to-match: "/api/**"
+
 sdk:
   logging:
     enabled: true
