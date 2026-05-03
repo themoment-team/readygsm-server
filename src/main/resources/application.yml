@@ -50,8 +50,7 @@ server:
 
 springdoc:
   swagger-ui:
-    config-url: /ready-gsm/v3/api-docs/swagger-config
-    url: /ready-gsm/v3/api-docs/API
+    disable-swagger-default-url: true
 
 google:
   oauth:
