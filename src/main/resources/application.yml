@@ -51,6 +51,12 @@ google:
     client-secret: ${GOOGLE_CLIENT_SECRET}
     redirect-uri: ${GOOGLE_REDIRECT_URI}
 
+kakao:
+  oauth:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+    redirect-uri: ${KAKAO_REDIRECT_URI}
+
 oauth2:
   success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
   failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:/}
