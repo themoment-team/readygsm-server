@@ -46,6 +46,12 @@ server:
     context-path: /ready-gsm
     session:
       timeout: 3h
+  forward-headers-strategy: framework
+
+springdoc:
+  swagger-ui:
+    config-url: /ready-gsm/v3/api-docs/swagger-config
+    url: /ready-gsm/v3/api-docs/API
 
 google:
   oauth:
