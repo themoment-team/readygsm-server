@@ -36,6 +36,10 @@ public class KakaoOAuthProvider implements OAuthProvider {
 
         KakaoUserInfoResponse userInfoResponse = kakaoUserInfoClient.getUserInfo(tokenResponse.accessToken());
 
+        if (userInfoResponse.email() == null) {
+            throw new IllegalArgumentException("카카오 계정의 이메일 정보를 불러올 수 없습니다. 필수 동의 항목을 확인해주세요.");
+        }
+
         return new UserAuthInfo(userInfoResponse.email(), PROVIDER_NAME, AuthReferrerType.KAKAO);
     }
 }
