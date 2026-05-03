@@ -74,6 +74,8 @@ sdk:
       - "/v3/api-docs/**"
       - "/swagger-ui/**"
       - "/api/v1/auth/callback"
+      - "/ready-gsm/v3/api-docs/**"
+      - "/ready-gsm/swagger-ui/**"
 
   response:
     enabled: true
@@ -81,6 +83,9 @@ sdk:
       - "/v3/api-docs/**"
       - "/v3/api-docs"
       - "/swagger-ui/**"
+      - "/ready-gsm/v3/api-docs/**"
+      - "/ready-gsm/v3/api-docs"
+      - "/ready-gsm/swagger-ui/**"
 
   exception:
     enabled: true
