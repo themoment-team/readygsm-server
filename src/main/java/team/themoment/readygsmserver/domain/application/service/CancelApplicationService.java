@@ -15,9 +15,9 @@ public class CancelApplicationService {
     private final ApplicationRepository applicationRepository;
 
     public void execute(Long userId, Long activityId) {
-        applicationRepository.delete(
-                applicationRepository.findByActivity_IdAndUser_Id(activityId, userId)
-                        .orElseThrow(() -> new ExpectedException("신청 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND))
-        );
+        int deleted = applicationRepository.deleteByActivity_IdAndUser_Id(activityId, userId);
+        if (deleted == 0) {
+            throw new ExpectedException("신청 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+        }
     }
 }
