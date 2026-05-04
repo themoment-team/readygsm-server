@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import team.themoment.readygsmserver.domain.application.dto.request.ApplicationReqDto;
 import team.themoment.readygsmserver.domain.application.dto.response.ApplicationResDto;
 import team.themoment.readygsmserver.domain.application.service.ApplyActivityService;
@@ -43,7 +44,7 @@ public class ApplicationController {
             @ApiResponse(responseCode = "409", description = "이미 신청한 활동")
     })
     @PostMapping("/apply")
-    public ApplicationResDto applyActivity(@AuthRequest Long userId, @RequestParam Long activityId, @RequestBody ApplicationReqDto req) {
+    public ApplicationResDto applyActivity(@AuthRequest Long userId, @RequestParam Long activityId, @Valid @RequestBody ApplicationReqDto req) {
         return applyActivityService.execute(userId, activityId, req);
     }
 
