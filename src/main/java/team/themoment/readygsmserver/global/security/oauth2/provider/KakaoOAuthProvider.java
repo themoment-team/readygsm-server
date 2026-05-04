@@ -1,6 +1,7 @@
 package team.themoment.readygsmserver.global.security.oauth2.provider;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import team.themoment.readygsmserver.domain.auth.dto.UserAuthInfo;
 import team.themoment.readygsmserver.domain.user.entity.constant.AuthReferrerType;
@@ -9,6 +10,7 @@ import team.themoment.readygsmserver.global.security.oauth2.feign.KakaoTokenClie
 import team.themoment.readygsmserver.global.security.oauth2.feign.KakaoUserInfoClient;
 import team.themoment.readygsmserver.global.security.oauth2.feign.dto.KakaoTokenResponse;
 import team.themoment.readygsmserver.global.security.oauth2.feign.dto.KakaoUserInfoResponse;
+import team.themoment.sdk.exception.ExpectedException;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +39,7 @@ public class KakaoOAuthProvider implements OAuthProvider {
         KakaoUserInfoResponse userInfoResponse = kakaoUserInfoClient.getUserInfo(tokenResponse.accessToken());
 
         if (userInfoResponse.email() == null) {
-            throw new IllegalArgumentException("카카오 계정의 이메일 정보를 불러올 수 없습니다. 필수 동의 항목을 확인해주세요.");
+            throw new ExpectedException("카카오 계정의 이메일 정보를 불러올 수 없습니다. 필수 동의 항목을 확인해주세요.", HttpStatus.BAD_REQUEST);
         }
 
         return new UserAuthInfo(userInfoResponse.email(), PROVIDER_NAME, AuthReferrerType.KAKAO);

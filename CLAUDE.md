@@ -30,4 +30,3 @@ The following environment variables are required before running.
 | `GOOGLE_REDIRECT_URI` | Google OAuth2 redirect URI (must match Google Console registration, e.g. `http://localhost:3000/oauth/callback`) |
 | `KAKAO_CLIENT_ID` | Kakao OAuth2 REST API key |
 | `KAKAO_CLIENT_SECRET` | Kakao OAuth2 client secret |
-| `KAKAO_REDIRECT_URI` | Kakao OAuth2 redirect URI (must match Kakao Developers registration) |
