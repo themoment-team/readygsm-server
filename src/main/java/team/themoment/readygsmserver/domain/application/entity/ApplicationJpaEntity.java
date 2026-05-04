@@ -9,8 +9,10 @@ import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tb_application", uniqueConstraints = {@UniqueConstraint(columnNames =
-        {"activity_id", "user_id"})})
+@Table(name = "tb_application", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"activity_id", "user_id"}),
+        @UniqueConstraint(columnNames = {"user_id"})
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
