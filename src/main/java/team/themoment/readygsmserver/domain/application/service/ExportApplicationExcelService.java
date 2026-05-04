@@ -28,6 +28,17 @@ public class ExportApplicationExcelService {
     private static final int COL_PHONE_NUMBER = 5;
     private static final int COL_FAMILY_PHONE_NUMBER = 6;
 
+    // POI 컬럼 너비 단위: 1/256 문자 폭
+    private static final int[] COL_WIDTHS = {
+            10 * 256,  // 이름
+            6 * 256,   // 학년
+            6 * 256,   // 반
+            6 * 256,   // 번호
+            30 * 256,  // 학교명
+            16 * 256,  // 연락처
+            16 * 256   // 보호자 연락처
+    };
+
     private final ApplicationRepository applicationRepository;
 
     public byte[] execute(Long activityId) {
@@ -53,8 +64,8 @@ public class ExportApplicationExcelService {
                 row.createCell(COL_FAMILY_PHONE_NUMBER).setCellValue(app.getFamilyPhoneNumber());
             }
 
-            for (int i = 0; i < HEADERS.length; i++) {
-                sheet.autoSizeColumn(i);
+            for (int i = 0; i < COL_WIDTHS.length; i++) {
+                sheet.setColumnWidth(i, COL_WIDTHS[i]);
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
