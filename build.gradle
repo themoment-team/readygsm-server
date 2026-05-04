@@ -50,6 +50,9 @@ dependencies {
 
     /* sdk */
     implementation("com.github.themoment-team:the-sdk:1.5")
+
+    /* Excel */
+    implementation 'org.apache.poi:poi-ooxml:5.5.1'
 }
 
 tasks.named('test') {
