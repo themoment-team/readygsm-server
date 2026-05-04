@@ -85,6 +85,8 @@ sdk:
       - "/ready-gsm/v3/api-docs/**"
       - "/ready-gsm/v3/api-docs"
       - "/ready-gsm/swagger-ui/**"
+      - "/api/v1/application/admin/excel"
+      - "/ready-gsm/api/v1/application/admin/excel"
 
   exception:
     enabled: true
