@@ -17,18 +17,7 @@ public class QueryApplicationsService {
 
     public List<ApplicationResDto> execute(Long activityId) {
         return applicationRepository.findAllByActivity_Id(activityId).stream()
-                .map(a -> new ApplicationResDto(
-                        a.getId(),
-                        a.getActivity().getId(),
-                        a.getUser().getId(),
-                        a.getName(),
-                        a.getGrade(),
-                        a.getClassNumber(),
-                        a.getNumber(),
-                        a.getSchoolName(),
-                        a.getPhoneNumber(),
-                        a.getFamilyPhoneNumber()
-                ))
+                .map(ApplicationResDto::from)
                 .toList();
     }
 }

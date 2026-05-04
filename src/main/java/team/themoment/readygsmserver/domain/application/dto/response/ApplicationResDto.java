@@ -1,6 +1,6 @@
 package team.themoment.readygsmserver.domain.application.dto.response;
 
-import java.time.LocalDateTime;
+import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 
 public record ApplicationResDto(
         Long id,
@@ -14,4 +14,18 @@ public record ApplicationResDto(
         String phoneNumber,
         String familyPhoneNumber
 ) {
+    public static ApplicationResDto from(ApplicationJpaEntity entity) {
+        return new ApplicationResDto(
+                entity.getId(),
+                entity.getActivity().getId(),
+                entity.getUser().getId(),
+                entity.getName(),
+                entity.getGrade(),
+                entity.getClassNumber(),
+                entity.getNumber(),
+                entity.getSchoolName(),
+                entity.getPhoneNumber(),
+                entity.getFamilyPhoneNumber()
+        );
+    }
 }

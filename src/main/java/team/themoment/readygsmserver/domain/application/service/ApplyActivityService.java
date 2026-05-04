@@ -53,17 +53,6 @@ public class ApplyActivityService {
                         .build()
         );
 
-        return new ApplicationResDto(
-                saved.getId(),
-                saved.getActivity().getId(),
-                saved.getUser().getId(),
-                saved.getName(),
-                saved.getGrade(),
-                saved.getClassNumber(),
-                saved.getNumber(),
-                saved.getSchoolName(),
-                saved.getPhoneNumber(),
-                saved.getFamilyPhoneNumber()
-        );
+        return ApplicationResDto.from(saved);
     }
 }
