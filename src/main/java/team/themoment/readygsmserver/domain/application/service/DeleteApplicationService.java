@@ -15,9 +15,9 @@ public class DeleteApplicationService {
     private final ApplicationRepository applicationRepository;
 
     public void execute(Long applicationId) {
-        applicationRepository.delete(
-                applicationRepository.findById(applicationId)
-                        .orElseThrow(() -> new ExpectedException("신청 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND))
-        );
+        int deleted = applicationRepository.deleteByApplicationId(applicationId);
+        if (deleted == 0) {
+            throw new ExpectedException("신청 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+        }
     }
 }
