@@ -24,7 +24,7 @@ public class ApplyActivityService {
     private final UserRepository userRepository;
 
     public ApplicationResDto execute(Long userId, Long activityId, ApplicationReqDto req) {
-        ActivityJpaEntity activity = activityRepository.findById(activityId)
+        ActivityJpaEntity activity = activityRepository.findByIdWithLock(activityId)
                 .orElseThrow(() -> new ExpectedException("활동을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         UserJpaEntity user = userRepository.findById(userId)
