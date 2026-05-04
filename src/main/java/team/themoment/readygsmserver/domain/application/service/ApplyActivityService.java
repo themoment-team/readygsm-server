@@ -1,0 +1,69 @@
+package team.themoment.readygsmserver.domain.application.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import team.themoment.readygsmserver.domain.activity.entity.ActivityJpaEntity;
+import team.themoment.readygsmserver.domain.activity.repository.ActivityRepository;
+import team.themoment.readygsmserver.domain.application.dto.request.ApplicationReqDto;
+import team.themoment.readygsmserver.domain.application.dto.response.ApplicationResDto;
+import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
+import team.themoment.readygsmserver.domain.application.repository.ApplicationRepository;
+import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
+import team.themoment.readygsmserver.domain.user.repository.UserRepository;
+import team.themoment.sdk.exception.ExpectedException;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ApplyActivityService {
+
+    private final ApplicationRepository applicationRepository;
+    private final ActivityRepository activityRepository;
+    private final UserRepository userRepository;
+
+    public ApplicationResDto execute(Long userId, Long activityId, ApplicationReqDto req) {
+        ActivityJpaEntity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new ExpectedException("활동을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
+        UserJpaEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ExpectedException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
+        if (applicationRepository.existsByUser_Id(userId)) {
+            throw new ExpectedException("이미 신청한 활동이 있습니다.", HttpStatus.CONFLICT);
+        }
+
+        long currentApplicants = applicationRepository.countByActivity_Id(activityId);
+        if (currentApplicants >= activity.getMaxApplicant()) {
+            throw new ExpectedException("신청 정원이 초과되었습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        ApplicationJpaEntity saved = applicationRepository.save(
+                ApplicationJpaEntity.builder()
+                        .activity(activity)
+                        .user(user)
+                        .name(req.name())
+                        .grade(req.grade())
+                        .classNumber(req.classNumber())
+                        .number(req.number())
+                        .schoolName(req.schoolName())
+                        .phoneNumber(req.phoneNumber())
+                        .familyPhoneNumber(req.familyPhoneNumber())
+                        .build()
+        );
+
+        return new ApplicationResDto(
+                saved.getId(),
+                saved.getActivity().getId(),
+                saved.getUser().getId(),
+                saved.getName(),
+                saved.getGrade(),
+                saved.getClassNumber(),
+                saved.getNumber(),
+                saved.getSchoolName(),
+                saved.getPhoneNumber(),
+                saved.getFamilyPhoneNumber()
+        );
+    }
+}
