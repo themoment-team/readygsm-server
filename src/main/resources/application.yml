@@ -29,17 +29,6 @@ spring:
       flush-mode: immediate
       save-mode: on-set-attribute
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope:
-              - email
-              - profile
-
 server:
   port: 8080
   servlet:
@@ -56,7 +45,6 @@ google:
   oauth:
     client-id: ${GOOGLE_CLIENT_ID}
     client-secret: ${GOOGLE_CLIENT_SECRET}
-    redirect-uri: ${GOOGLE_REDIRECT_URI}
 
 kakao:
   oauth:
