@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### LLM outputs ###
+PR_BODY.md
+/.claude/bash-log.txt

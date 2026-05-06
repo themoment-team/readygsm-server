@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: readygsm-server
+
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/readygsm?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      database: 1
+
+  session:
+    redis:
+      flush-mode: immediate
+      save-mode: on-set-attribute
+
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 3h
+  forward-headers-strategy: framework
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    config-url: /ready-gsm/v3/api-docs/swagger-config
+    url: /ready-gsm/v3/api-docs
+
+google:
+  oauth:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+
+kakao:
+  oauth:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+
+oauth2:
+  success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
+  failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:/}
+  allowed-redirect-uris:
+    - "http://localhost:3000/oauth/callback"
+    - "https://stage.readygsm.kr/oauth/callback"
+    - "https://www.readygsm.kr/oauth/callback"
+
+sdk:
+  logging:
+    enabled: true
+    not-logging-urls:
+      - "/v3/api-docs/**"
+      - "/swagger-ui/**"
+      - "/api/v1/auth/callback"
+
+  response:
+    enabled: true
+    not-wrapping-urls:
+      - "/v3/api-docs/**"
+      - "/v3/api-docs"
+      - "/swagger-ui/**"
+      - "/swagger-ui.html"
+      - "/api/v1/application/admin/excel"
+
+  exception:
+    enabled: true
+    use-english-message: true
+
+  swagger:
+    enabled: true
+    title: "ReadyGSM API"
+    paths-to-match:
+      - "/api/**"
