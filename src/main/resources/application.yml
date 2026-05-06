@@ -49,7 +49,7 @@ server:
 
 springdoc:
   swagger-ui:
-    disable-swagger-default-url: true
+    url: /v3/api-docs/API
 
 google:
   oauth:
