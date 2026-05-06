@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +27,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     @GetMapping("/me")
-    public ResponseEntity<UserResDto> getMe(@AuthenticationPrincipal OAuth2User user) {
-        return ResponseEntity.ok(userService.getMe(user));
+    public UserResDto getMe(@AuthenticationPrincipal OAuth2User user) {
+        return userService.getMe(user);
     }
 }
