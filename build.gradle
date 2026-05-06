@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'team.themoment'
-version = '0.0.1-SNAPSHOT'
+version = 'v20260506.0'
 description = 'readygsm-server'
 
 java {
