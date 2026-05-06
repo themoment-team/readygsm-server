@@ -49,7 +49,8 @@ server:
 
 springdoc:
   swagger-ui:
-    url: /v3/api-docs/API
+    url: /ready-gsm/v3/api-docs/API
+    config-url: /ready-gsm/v3/api-docs/swagger-config
 
 google:
   oauth:
@@ -85,9 +86,9 @@ sdk:
       - "/v3/api-docs"
       - "/swagger-ui/**"
       - "/swagger-ui.html"
-      - "**/v3/api-docs/**"
-      - "**/v3/api-docs"
-      - "**/swagger-ui/**"
+      - "/ready-gsm/v3/api-docs/**"
+      - "/ready-gsm/v3/api-docs"
+      - "/ready-gsm/swagger-ui/**"
       - "/api/v1/application/admin/excel"
 
   exception:
