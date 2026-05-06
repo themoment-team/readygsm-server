@@ -43,7 +43,6 @@ spring:
 server:
   port: 8080
   servlet:
-    context-path: /ready-gsm
     session:
       timeout: 3h
   forward-headers-strategy: framework
@@ -78,8 +77,6 @@ sdk:
       - "/v3/api-docs/**"
       - "/swagger-ui/**"
       - "/api/v1/auth/callback"
-      - "/ready-gsm/v3/api-docs/**"
-      - "/ready-gsm/swagger-ui/**"
 
   response:
     enabled: true
@@ -87,9 +84,7 @@ sdk:
       - "/v3/api-docs/**"
       - "/v3/api-docs"
       - "/swagger-ui/**"
-      - "/ready-gsm/v3/api-docs/**"
-      - "/ready-gsm/v3/api-docs"
-      - "/ready-gsm/swagger-ui/**"
+      - "/api/v1/application/admin/excel"
 
   exception:
     enabled: true

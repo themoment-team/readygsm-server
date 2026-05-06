@@ -12,6 +12,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
+import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 
 @Configuration
 @EnableWebSecurity
@@ -39,6 +40,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS).permitAll()
+                        .requestMatchers("/api/v1/application/admin/**").hasAuthority(Role.ADMIN.getAuthority())
                         .anyRequest().authenticated()
                 );
 
