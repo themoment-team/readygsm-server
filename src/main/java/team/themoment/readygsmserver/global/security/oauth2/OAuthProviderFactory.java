@@ -23,7 +23,7 @@ public class OAuthProviderFactory {
     public OAuthProvider getProvider(String providerName) {
         OAuthProvider provider = providerMap.get(providerName.trim().toLowerCase());
         if (provider == null) {
-            throw new ExpectedException("지원하지 않는 OAuth 제공자입니다.", HttpStatus.BAD_REQUEST);
+            throw new ExpectedException("지원하지 않는 OAuth 제공자입니다: " + providerName, HttpStatus.BAD_REQUEST);
         }
         return provider;
     }
