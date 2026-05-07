@@ -18,10 +18,12 @@ public class FeignClientConfig {
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+    private static final OAuthErrorDecoder oAuthErrorDecoder = new OAuthErrorDecoder();
+
     private Feign.Builder baseBuilder() {
         return Feign.builder()
                 .decoder(new JacksonDecoder(objectMapper))
-                .errorDecoder(new OAuthErrorDecoder());
+                .errorDecoder(oAuthErrorDecoder);
     }
 
     @Bean
