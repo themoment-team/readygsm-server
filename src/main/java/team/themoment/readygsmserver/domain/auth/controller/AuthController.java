@@ -5,12 +5,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import team.themoment.readygsmserver.domain.auth.dto.request.OAuthCodeRequest;
+import team.themoment.readygsmserver.domain.auth.service.LogoutService;
 import team.themoment.readygsmserver.domain.auth.service.OAuthAuthenticationService;
 
 @RestController
@@ -20,16 +19,13 @@ import team.themoment.readygsmserver.domain.auth.service.OAuthAuthenticationServ
 public class AuthController {
 
     private final OAuthAuthenticationService oAuthAuthenticationService;
+    private final LogoutService logoutService;
 
     @Operation(summary = "로그아웃", description = "현재 세션을 만료시킵니다.")
     @ApiResponse(responseCode = "200", description = "로그아웃 완료")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        SecurityContextHolder.clearContext();
+        logoutService.execute(request);
         return ResponseEntity.ok().build();
     }
 
