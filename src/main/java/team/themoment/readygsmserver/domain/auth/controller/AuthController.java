@@ -24,9 +24,8 @@ public class AuthController {
     @Operation(summary = "로그아웃", description = "현재 세션을 만료시킵니다.")
     @ApiResponse(responseCode = "200", description = "로그아웃 완료")
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public void logout(HttpServletRequest request) {
         logoutService.execute(request);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "OAuth 로그인", description = "프론트엔드에서 Authorization Code와 redirect_uri를 전달해 로그인합니다.")
