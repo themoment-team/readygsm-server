@@ -24,7 +24,7 @@ public class UserJpaEntity {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "auth_referrer_type", nullable = false)
+    @Column(name = "auth_referrer_type", nullable = false, columnDefinition = "VARCHAR(50)")
     private AuthReferrerType authReferrerType;
 
     @Enumerated(EnumType.STRING)
