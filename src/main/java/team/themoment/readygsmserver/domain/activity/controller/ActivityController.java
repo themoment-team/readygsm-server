@@ -18,8 +18,7 @@ public class ActivityController {
 
     @Operation(summary = "전체 활동 조회", description = "서비스에 등록되어 있는 모든 활동 목록과 각 정보를 조회합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+            @ApiResponse(responseCode = "200", description = "조회 성공")
     })
     @GetMapping
     public List<ActivityResDto> queryAllActivities() {
@@ -29,7 +28,6 @@ public class ActivityController {
     @Operation(summary = "활동 단일 조회", description = "활동 정보를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
             @ApiResponse(responseCode = "404", description = "활동을 찾을 수 없음")
     })
     @GetMapping("/{id}")
@@ -44,7 +42,7 @@ public class ActivityController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
             @ApiResponse(responseCode = "403", description = "권한 없음")
     })
-    @PostMapping
+    @PostMapping("/admin")
     public ActivityResDto createActivity(@RequestBody ActivityReqDto req) {
         return null;
     }
@@ -57,7 +55,7 @@ public class ActivityController {
             @ApiResponse(responseCode = "403", description = "권한 없음"),
             @ApiResponse(responseCode = "404", description = "활동을 찾을 수 없음")
     })
-    @PatchMapping("/{id}")
+    @PatchMapping("/admin/{id}")
     public ActivityResDto editActivity(@PathVariable Long id, @RequestBody ActivityReqDto req) {
         return null;
     }
@@ -69,7 +67,7 @@ public class ActivityController {
             @ApiResponse(responseCode = "403", description = "권한 없음"),
             @ApiResponse(responseCode = "404", description = "활동을 찾을 수 없음")
     })
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
     public void deleteActivity(@PathVariable Long id) {
     }
 }
