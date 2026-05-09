@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsmserver.domain.auth.dto.UserAuthInfo;
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
@@ -18,6 +19,7 @@ import team.themoment.readygsmserver.domain.user.repository.UserRepository;
 import team.themoment.readygsmserver.global.security.oauth2.OAuth2Properties;
 import team.themoment.readygsmserver.global.security.oauth2.OAuthProviderFactory;
 import team.themoment.readygsmserver.global.security.oauth2.provider.OAuthProvider;
+import team.themoment.sdk.exception.ExpectedException;
 
 import java.util.List;
 import java.util.Map;
@@ -77,10 +79,10 @@ public class OAuthAuthenticationService {
 
     private void validateRedirectUri(String redirectUri) {
         if (redirectUri == null || redirectUri.isBlank()) {
-            throw new IllegalArgumentException("redirect_uri는 필수입니다.");
+            throw new ExpectedException("redirect_uri는 필수입니다.", HttpStatus.BAD_REQUEST);
         }
         if (!oauth2Properties.allowedRedirectUris().contains(redirectUri)) {
-            throw new IllegalArgumentException("허용되지 않은 redirect_uri입니다: " + redirectUri);
+            throw new ExpectedException("허용되지 않은 redirect_uri입니다.", HttpStatus.BAD_REQUEST);
         }
     }
 }

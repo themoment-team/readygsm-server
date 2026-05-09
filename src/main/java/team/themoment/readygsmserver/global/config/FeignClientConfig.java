@@ -10,6 +10,7 @@ import team.themoment.readygsmserver.global.security.oauth2.feign.GoogleTokenCli
 import team.themoment.readygsmserver.global.security.oauth2.feign.GoogleUserInfoClient;
 import team.themoment.readygsmserver.global.security.oauth2.feign.KakaoTokenClient;
 import team.themoment.readygsmserver.global.security.oauth2.feign.KakaoUserInfoClient;
+import team.themoment.readygsmserver.global.security.oauth2.feign.OAuthErrorDecoder;
 
 @Configuration
 public class FeignClientConfig {
@@ -17,31 +18,31 @@ public class FeignClientConfig {
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    @Bean
-    public GoogleTokenClient googleTokenClient() {
+    private static final OAuthErrorDecoder oAuthErrorDecoder = new OAuthErrorDecoder();
+
+    private Feign.Builder baseBuilder() {
         return Feign.builder()
                 .decoder(new JacksonDecoder(objectMapper))
-                .target(GoogleTokenClient.class, "https://oauth2.googleapis.com");
+                .errorDecoder(oAuthErrorDecoder);
+    }
+
+    @Bean
+    public GoogleTokenClient googleTokenClient() {
+        return baseBuilder().target(GoogleTokenClient.class, "https://oauth2.googleapis.com");
     }
 
     @Bean
     public GoogleUserInfoClient googleUserInfoClient() {
-        return Feign.builder()
-                .decoder(new JacksonDecoder(objectMapper))
-                .target(GoogleUserInfoClient.class, "https://www.googleapis.com");
+        return baseBuilder().target(GoogleUserInfoClient.class, "https://www.googleapis.com");
     }
 
     @Bean
     public KakaoTokenClient kakaoTokenClient() {
-        return Feign.builder()
-                .decoder(new JacksonDecoder(objectMapper))
-                .target(KakaoTokenClient.class, "https://kauth.kakao.com");
+        return baseBuilder().target(KakaoTokenClient.class, "https://kauth.kakao.com");
     }
 
     @Bean
     public KakaoUserInfoClient kakaoUserInfoClient() {
-        return Feign.builder()
-                .decoder(new JacksonDecoder(objectMapper))
-                .target(KakaoUserInfoClient.class, "https://kapi.kakao.com");
+        return baseBuilder().target(KakaoUserInfoClient.class, "https://kapi.kakao.com");
     }
 }
