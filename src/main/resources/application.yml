@@ -57,7 +57,7 @@ oauth2:
   failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:/}
   allowed-redirect-uris:
     - "http://localhost:3000/oauth/callback"
-    - "https://kimtaeeun.site/ready-gsm/oauth/callback"
+    - "https://stage.readygsm.kr/oauth/callback"
     - "https://www.readygsm.kr/oauth/callback"
 
 sdk:
