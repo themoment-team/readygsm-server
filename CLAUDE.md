@@ -24,6 +24,7 @@ The following environment variables are required before running.
 
 | Variable | Description |
 |---|---|
+| `JWT_SECRET` | Base64-encoded HMAC secret key (256-bit or more) |
 | `GOOGLE_CLIENT_ID` | Google OAuth2 client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth2 client secret |
 | `KAKAO_CLIENT_ID` | Kakao OAuth2 REST API key |
