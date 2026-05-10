@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserJpaEntity, Long> {
     Optional<UserJpaEntity> findByAuthReferrerTypeAndEmail(AuthReferrerType authReferrerType, String email);
+    Optional<UserJpaEntity> findByEmail(String email);
 }
