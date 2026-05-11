@@ -1,6 +1,8 @@
 package team.themoment.readygsmserver.domain.activity.dto.response;
 
-import java.time.LocalDateTime;
+import team.themoment.readygsmserver.domain.activity.entity.ActivityJpaEntity;
+
+import java.time.LocalDate;
 
 public record ActivityResDto(
         Long id,
@@ -8,8 +10,20 @@ public record ActivityResDto(
         String place,
         String description,
         Integer maxApplicant,
-        LocalDateTime activityDate,
-        LocalDateTime start,
-        LocalDateTime end
+        LocalDate activityDate,
+        LocalDate start,
+        LocalDate end
 ) {
+    public static ActivityResDto from(ActivityJpaEntity entity) {
+        return new ActivityResDto(
+                entity.getId(),
+                entity.getName(),
+                entity.getPlace(),
+                entity.getDescription(),
+                entity.getMaxApplicant(),
+                entity.getActivityDate(),
+                entity.getStart(),
+                entity.getEnd()
+        );
+    }
 }

@@ -2,6 +2,7 @@ package team.themoment.readygsmserver.domain.activity.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import team.themoment.readygsmserver.domain.activity.dto.request.ActivityReqDto;
 
 import java.time.LocalDate;
 
@@ -38,4 +39,14 @@ public class ActivityJpaEntity {
 
     @Column(name = "end", nullable = false)
     private LocalDate end;
+
+    public void update(ActivityReqDto req) {
+        this.name = req.name();
+        this.place = req.place();
+        this.description = req.description();
+        this.maxApplicant = req.maxApplicant();
+        this.activityDate = req.activityDate();
+        this.start = req.start();
+        this.end = req.end();
+    }
 }
