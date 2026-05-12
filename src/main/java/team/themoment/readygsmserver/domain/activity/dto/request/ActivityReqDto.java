@@ -24,7 +24,7 @@ public record ActivityReqDto(
     @AssertTrue(message = "신청 시작 시각은 종료 시각보다 이전이어야 합니다.")
     public boolean isRegistrationStartBeforeEnd() {
         if (registrationStartAt == null || registrationEndAt == null) return true;
-        return !registrationStartAt.isAfter(registrationEndAt);
+        return registrationStartAt.isBefore(registrationEndAt);
     }
 
     @AssertTrue(message = "활동 시작 시각은 종료 시각보다 이전이어야 합니다.")
@@ -33,9 +33,9 @@ public record ActivityReqDto(
         return activityStartTime.isBefore(activityEndTime);
     }
 
-    @AssertTrue(message = "신청 마감은 활동 당일 또는 그 이전이어야 합니다.")
+    @AssertTrue(message = "신청 마감은 활동 시작 시각보다 이전이어야 합니다.")
     public boolean isRegistrationEndBeforeActivity() {
-        if (registrationEndAt == null || activityDate == null) return true;
-        return !registrationEndAt.toLocalDate().isAfter(activityDate);
+        if (registrationEndAt == null || activityDate == null || activityStartTime == null) return true;
+        return registrationEndAt.isBefore(LocalDateTime.of(activityDate, activityStartTime));
     }
 }
