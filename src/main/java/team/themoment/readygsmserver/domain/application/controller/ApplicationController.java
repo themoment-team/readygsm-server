@@ -67,7 +67,7 @@ public class ApplicationController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     @GetMapping("/my")
-    public List<ApplicationResDto> getMyApplications(@AuthRequest Long userId) {
+    public ApplicationResDto getMyApplications(@AuthRequest Long userId) {
         return queryMyApplicationsService.execute(userId);
     }
 
