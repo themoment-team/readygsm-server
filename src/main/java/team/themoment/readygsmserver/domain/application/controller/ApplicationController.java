@@ -64,7 +64,8 @@ public class ApplicationController {
     @Operation(summary = "내 신청 목록 조회", description = "내가 신청한 활동 목록을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "404", description = "신청 내역을 찾을 수 없음")
     })
     @GetMapping("/my")
     public ApplicationResDto getMyApplications(@AuthRequest Long userId) {
