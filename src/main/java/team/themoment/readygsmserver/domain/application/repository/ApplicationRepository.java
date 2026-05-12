@@ -12,6 +12,7 @@ public interface ApplicationRepository extends JpaRepository<ApplicationJpaEntit
     boolean existsByUser_Id(Long userId);
     long countByActivity_Id(Long activityId);
     List<ApplicationJpaEntity> findAllByActivity_Id(Long activityId);
+    List<ApplicationJpaEntity> findAllByUser_Id(Long userId);
 
     @Modifying
     @Query("DELETE FROM ApplicationJpaEntity a WHERE a.activity.id = :activityId AND a.user.id = :userId")
