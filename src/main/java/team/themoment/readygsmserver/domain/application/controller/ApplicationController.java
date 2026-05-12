@@ -18,6 +18,7 @@ import team.themoment.readygsmserver.domain.application.service.CancelApplicatio
 import team.themoment.readygsmserver.domain.application.service.DeleteApplicationService;
 import team.themoment.readygsmserver.domain.application.service.ExportApplicationExcelService;
 import team.themoment.readygsmserver.domain.application.service.QueryApplicationsService;
+import team.themoment.readygsmserver.domain.application.service.QueryMyApplicationsService;
 import team.themoment.readygsmserver.global.security.annotation.AuthRequest;
 
 import java.nio.charset.StandardCharsets;
@@ -32,6 +33,7 @@ public class ApplicationController {
     private final ApplyActivityService applyActivityService;
     private final CancelApplicationService cancelApplicationService;
     private final QueryApplicationsService queryApplicationsService;
+    private final QueryMyApplicationsService queryMyApplicationsService;
     private final DeleteApplicationService deleteApplicationService;
     private final ExportApplicationExcelService exportApplicationExcelService;
 
@@ -57,6 +59,17 @@ public class ApplicationController {
     @DeleteMapping("/cancel")
     public void cancelApplication(@AuthRequest Long userId, @RequestParam Long activityId) {
         cancelApplicationService.execute(userId, activityId);
+    }
+
+    @Operation(summary = "내 신청 목록 조회", description = "내가 신청한 활동 목록을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "404", description = "신청 내역을 찾을 수 없음")
+    })
+    @GetMapping("/my")
+    public ApplicationResDto getMyApplications(@AuthRequest Long userId) {
+        return queryMyApplicationsService.execute(userId);
     }
 
     @Operation(summary = "신청한 학생 조회", description = "활동을 신청한 학생 목록을 조회합니다.")
