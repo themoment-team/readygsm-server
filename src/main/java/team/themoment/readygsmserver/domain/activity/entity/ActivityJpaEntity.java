@@ -5,6 +5,8 @@ import lombok.*;
 import team.themoment.readygsmserver.domain.activity.dto.request.ActivityReqDto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "tb_activity")
@@ -34,11 +36,17 @@ public class ActivityJpaEntity {
     @Column(name = "activity_date", nullable = false)
     private LocalDate activityDate;
 
-    @Column(name = "start", nullable = false)
-    private LocalDate start;
+    @Column(name = "registration_start_at", nullable = false)
+    private LocalDateTime registrationStartAt;
 
-    @Column(name = "end", nullable = false)
-    private LocalDate end;
+    @Column(name = "registration_end_at", nullable = false)
+    private LocalDateTime registrationEndAt;
+
+    @Column(name = "activity_start_time", nullable = false)
+    private LocalTime activityStartTime;
+
+    @Column(name = "activity_end_time", nullable = false)
+    private LocalTime activityEndTime;
 
     public void update(ActivityReqDto req) {
         this.name = req.name();
@@ -46,7 +54,9 @@ public class ActivityJpaEntity {
         this.description = req.description();
         this.maxApplicant = req.maxApplicant();
         this.activityDate = req.activityDate();
-        this.start = req.start();
-        this.end = req.end();
+        this.registrationStartAt = req.registrationStartAt();
+        this.registrationEndAt = req.registrationEndAt();
+        this.activityStartTime = req.activityStartTime();
+        this.activityEndTime = req.activityEndTime();
     }
 }

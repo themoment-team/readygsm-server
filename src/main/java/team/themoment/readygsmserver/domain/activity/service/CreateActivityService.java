@@ -23,8 +23,10 @@ public class CreateActivityService {
                         .description(req.description())
                         .maxApplicant(req.maxApplicant())
                         .activityDate(req.activityDate())
-                        .start(req.start())
-                        .end(req.end())
+                        .registrationStartAt(req.registrationStartAt())
+                        .registrationEndAt(req.registrationEndAt())
+                        .activityStartTime(req.activityStartTime())
+                        .activityEndTime(req.activityEndTime())
                         .build()
         );
         return ActivityResDto.from(saved);
