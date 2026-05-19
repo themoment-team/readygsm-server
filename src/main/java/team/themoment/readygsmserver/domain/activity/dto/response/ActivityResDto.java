@@ -12,19 +12,21 @@ public record ActivityResDto(
         String place,
         String description,
         Integer maxApplicant,
+        Integer currentApplicant,
         LocalDate activityDate,
         LocalDateTime registrationStartAt,
         LocalDateTime registrationEndAt,
         LocalTime activityStartTime,
         LocalTime activityEndTime
 ) {
-    public static ActivityResDto from(ActivityJpaEntity entity) {
+    public static ActivityResDto from(ActivityJpaEntity entity, long currentApplicant) {
         return new ActivityResDto(
                 entity.getId(),
                 entity.getName(),
                 entity.getPlace(),
                 entity.getDescription(),
                 entity.getMaxApplicant(),
+                (int) currentApplicant,
                 entity.getActivityDate(),
                 entity.getRegistrationStartAt(),
                 entity.getRegistrationEndAt(),
