@@ -29,6 +29,6 @@ public class CreateActivityService {
                         .activityEndTime(req.activityEndTime())
                         .build()
         );
-        return ActivityResDto.from(saved);
+        return ActivityResDto.from(saved, 0L);
     }
 }
