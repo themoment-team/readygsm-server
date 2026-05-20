@@ -12,6 +12,9 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<ApplicationJpaEntity, Long> {
     boolean existsByUser_Id(Long userId);
     long countByActivity_Id(Long activityId);
+
+    @Query("SELECT app.activity.id, COUNT(app) FROM ApplicationJpaEntity app GROUP BY app.activity.id")
+    List<Object[]> countApplicantsGroupedByActivity();
     List<ApplicationJpaEntity> findAllByActivity_Id(Long activityId);
     Optional<ApplicationJpaEntity> findByUser_Id(Long userId);
 

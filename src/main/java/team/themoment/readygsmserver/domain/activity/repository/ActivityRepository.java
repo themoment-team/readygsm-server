@@ -7,20 +7,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import team.themoment.readygsmserver.domain.activity.entity.ActivityJpaEntity;
-import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface ActivityRepository extends JpaRepository<ActivityJpaEntity, Long> {
-
-    @Query("""
-            SELECT a.id, COUNT(app)
-            FROM ActivityJpaEntity a
-            LEFT JOIN ApplicationJpaEntity app ON app.activity.id = a.id
-            GROUP BY a.id
-            """)
-    List<Object[]> countApplicantsGroupedByActivity();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM ActivityJpaEntity a WHERE a.id = :id")

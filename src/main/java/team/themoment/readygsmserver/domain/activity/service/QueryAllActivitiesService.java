@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsmserver.domain.activity.dto.response.ActivityResDto;
 import team.themoment.readygsmserver.domain.activity.repository.ActivityRepository;
+import team.themoment.readygsmserver.domain.application.repository.ApplicationRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -16,9 +17,10 @@ import java.util.stream.Collectors;
 public class QueryAllActivitiesService {
 
     private final ActivityRepository activityRepository;
+    private final ApplicationRepository applicationRepository;
 
     public List<ActivityResDto> execute() {
-        Map<Long, Long> countMap = activityRepository.countApplicantsGroupedByActivity()
+        Map<Long, Long> countMap = applicationRepository.countApplicantsGroupedByActivity()
                 .stream()
                 .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
 
