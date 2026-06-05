@@ -1,0 +1,11 @@
+{
+  "name": "readygsm-infra",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/node": "^18"
+  },
+  "dependencies": {
+    "@pulumi/pulumi": "^3",
+    "@pulumi/aws": "^6"
+  }
+}

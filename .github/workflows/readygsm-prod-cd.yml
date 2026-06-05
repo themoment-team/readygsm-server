@@ -1,0 +1,126 @@
+name: Production CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: readygsm-prod-app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Build JAR
+        run: ./gradlew bootJar -x test --no-daemon
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image to ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE_URI="${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${IMAGE_TAG}"
+          docker build -f docker/stage.Dockerfile \
+            -t "${IMAGE_URI}" \
+            -t "${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:latest" \
+            .
+          docker push "${IMAGE_URI}"
+          docker push "${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:latest"
+          echo "image_uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
+
+      - name: Copy config files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ec2-user
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          source: "deploy/compose.prod.yml,docker/nginx.conf"
+          target: "/home/ec2-user/readygsm-files/"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ec2-user
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -e
+
+            # 전송된 파일을 올바른 위치로 이동
+            cp /home/ec2-user/readygsm-files/deploy/compose.prod.yml /home/ec2-user/readygsm/compose.prod.yml
+            mkdir -p /home/ec2-user/readygsm/nginx
+            cp /home/ec2-user/readygsm-files/docker/nginx.conf /home/ec2-user/readygsm/nginx/nginx.conf
+
+            cd /home/ec2-user/readygsm
+
+            # ECR 로그인 (EC2 IAM 인스턴스 프로파일 사용)
+            aws ecr get-login-password --region $AWS_REGION \
+              | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            # .env 파일 갱신
+            cat > .env << ENVEOF
+            PROD_MYSQL_USERNAME=$PROD_MYSQL_USERNAME
+            PROD_MYSQL_PASSWORD=$PROD_MYSQL_PASSWORD
+            PROD_MYSQL_ROOT_PASSWORD=$PROD_MYSQL_ROOT_PASSWORD
+            PROD_REDIS_PASSWORD=$PROD_REDIS_PASSWORD
+            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+            KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
+            KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
+            PROD_ECR_IMAGE=$PROD_ECR_IMAGE
+            ENVEOF
+
+            # 새 이미지 pull
+            docker pull $PROD_ECR_IMAGE
+
+            # 최초 배포: 모든 서비스 시작 / 재배포: app만 재시작
+            if docker compose -f compose.prod.yml --env-file .env ps --quiet mysql 2>/dev/null | grep -q .; then
+              docker compose -f compose.prod.yml --env-file .env up -d --no-deps app
+            else
+              docker compose -f compose.prod.yml --env-file .env up -d
+            fi
+
+            # 미사용 이미지 정리
+            docker image prune -f
+        env:
+          PROD_ECR_IMAGE: ${{ steps.build-image.outputs.image_uri }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          PROD_MYSQL_USERNAME: ${{ secrets.PROD_MYSQL_USERNAME }}
+          PROD_MYSQL_PASSWORD: ${{ secrets.PROD_MYSQL_PASSWORD }}
+          PROD_MYSQL_ROOT_PASSWORD: ${{ secrets.PROD_MYSQL_ROOT_PASSWORD }}
+          PROD_REDIS_PASSWORD: ${{ secrets.PROD_REDIS_PASSWORD }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
