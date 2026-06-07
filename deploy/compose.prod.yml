@@ -1,0 +1,86 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: readygsm-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
+    restart: always
+    networks:
+      - readygsm-net
+
+  app:
+    image: ${PROD_ECR_IMAGE}
+    container_name: readygsm-app
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USERNAME=${PROD_MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${PROD_MYSQL_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${PROD_REDIS_PASSWORD}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+    networks:
+      - readygsm-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: readygsm-mysql
+    environment:
+      - MYSQL_DATABASE=readygsm
+      - MYSQL_USER=${PROD_MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${PROD_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${PROD_MYSQL_ROOT_PASSWORD}
+      - TZ=Asia/Seoul
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${PROD_MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: always
+    networks:
+      - readygsm-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: readygsm-redis
+    command: >
+      redis-server
+      --requirepass ${PROD_REDIS_PASSWORD}
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${PROD_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - readygsm-net
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  readygsm-net:
+    driver: bridge
