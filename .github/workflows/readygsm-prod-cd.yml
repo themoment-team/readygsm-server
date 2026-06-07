@@ -25,10 +25,9 @@ jobs:
         with:
           java-version: "21"
           distribution: "temurin"
-          cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build JAR
         run: ./gradlew bootJar -x test --no-daemon
