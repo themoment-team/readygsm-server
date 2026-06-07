@@ -1,0 +1,3 @@
+name: readygsm-infra
+runtime: nodejs
+description: ReadyGSM Production Infrastructure

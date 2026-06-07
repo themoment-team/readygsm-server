@@ -2,6 +2,8 @@ package team.themoment.readygsmserver.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,6 +23,9 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
             "/api/v1/auth/**",
+            "/api/v1/activity",
+            "/api/v1/activity/*",
+            "/api/v1/utility/user/role",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs",
@@ -40,8 +45,9 @@ public class SecurityConfig {
                         .securityContextRepository(securityContextRepository())
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_PATHS).permitAll()
+                        .requestMatchers("/api/v1/activity/admin/**").hasAuthority(Role.ADMIN.getAuthority())
                         .requestMatchers("/api/v1/application/admin/**").hasAuthority(Role.ADMIN.getAuthority())
+                        .requestMatchers(PUBLIC_PATHS).permitAll()
                         .anyRequest().authenticated()
                 );
 
@@ -51,6 +57,14 @@ public class SecurityConfig {
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.fromHierarchy(
+                Role.ROOT.getAuthority() + " > " + Role.ADMIN.getAuthority() + "\n" +
+                Role.ADMIN.getAuthority() + " > " + Role.USER.getAuthority()
+        );
     }
 
     @Bean

@@ -47,4 +47,8 @@ public class UserJpaEntity {
     public void updateLastLoginTime() {
         this.lastLoginTime = LocalDateTime.now();
     }
+
+    public void modifyRole(Role role) {
+        this.role = role;
+    }
 }

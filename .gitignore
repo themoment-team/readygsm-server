@@ -39,3 +39,8 @@ out/
 ### LLM outputs ###
 PR_BODY.md
 /.claude/bash-log.txt
+
+### Pulumi ###
+infra/node_modules/
+infra/bin/
+infra/.pulumi/

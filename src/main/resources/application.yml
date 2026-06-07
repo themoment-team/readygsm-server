@@ -59,6 +59,8 @@ oauth2:
     - "http://localhost:3000/oauth/callback"
     - "https://stage.readygsm.kr/oauth/callback"
     - "https://www.readygsm.kr/oauth/callback"
+    - "https://readygsm-client.vercel.app/oauth/callback"
+    - "https://ready.hellogsm.kr/oauth/callback"
 
 sdk:
   logging:
