@@ -73,6 +73,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
+          envs: PROD_ECR_IMAGE,ECR_REGISTRY,AWS_REGION,PROD_MYSQL_USERNAME,PROD_MYSQL_PASSWORD,PROD_MYSQL_ROOT_PASSWORD,PROD_REDIS_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET
           script: |
             set -e
 
