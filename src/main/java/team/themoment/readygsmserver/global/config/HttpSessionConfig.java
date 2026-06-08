@@ -13,12 +13,14 @@ import java.util.EnumSet;
 @EnableRedisHttpSession
 public class HttpSessionConfig {
 
+    private static final int SESSION_FILTER_ORDER = Integer.MIN_VALUE + 50;
+
     @Bean
     public FilterRegistrationBean<SessionRepositoryFilter<?>> springSessionRepositoryFilterRegistration(
             SessionRepositoryFilter<?> springSessionRepositoryFilter) {
         FilterRegistrationBean<SessionRepositoryFilter<?>> registration =
                 new FilterRegistrationBean<>(springSessionRepositoryFilter);
-        registration.setOrder(Integer.MIN_VALUE + 50);
+        registration.setOrder(SESSION_FILTER_ORDER);
         registration.setDispatcherTypes(EnumSet.of(
                 DispatcherType.REQUEST, DispatcherType.ERROR, DispatcherType.ASYNC));
         return registration;
