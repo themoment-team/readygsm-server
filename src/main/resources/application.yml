@@ -52,6 +52,14 @@ kakao:
     client-id: ${KAKAO_CLIENT_ID}
     client-secret: ${KAKAO_CLIENT_SECRET}
 
+cors:
+  allowed-origins:
+    - "http://localhost:3000"
+    - "https://kimtaeeun.site"
+    - "https://www.readygsm.kr"
+    - "https://readygsm-client.vercel.app"
+    - "https://ready.hellogsm.kr"
+
 oauth2:
   success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
   failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:/}
