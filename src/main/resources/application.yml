@@ -25,6 +25,7 @@ spring:
       database: 1
 
   session:
+    store-type: redis
     redis:
       flush-mode: immediate
       save-mode: on-set-attribute
