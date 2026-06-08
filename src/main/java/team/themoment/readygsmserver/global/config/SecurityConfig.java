@@ -11,14 +11,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 
 @Configuration
 @EnableWebSecurity
-@EnableRedisHttpSession
 public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
