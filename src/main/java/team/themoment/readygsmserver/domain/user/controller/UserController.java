@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import team.themoment.readygsmserver.domain.user.dto.response.UserResDto;
-import team.themoment.readygsmserver.domain.user.service.UserService;
+import team.themoment.readygsmserver.domain.user.service.QueryUserService;
 
 @RestController
 @Tag(name = "User", description = "유저 API")
@@ -19,7 +19,7 @@ import team.themoment.readygsmserver.domain.user.service.UserService;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final QueryUserService queryUserService;
 
     @Operation(summary = "내 정보 조회", description = "현재 로그인한 유저의 정보를 반환합니다.")
     @ApiResponses({
@@ -27,7 +27,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     @GetMapping("/me")
-    public UserResDto getMe(@AuthenticationPrincipal OAuth2User user) {
-        return userService.getMe(user);
+    public UserResDto queryMe(@AuthenticationPrincipal OAuth2User user) {
+        return queryUserService.execute(user);
     }
 }

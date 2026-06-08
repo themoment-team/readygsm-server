@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import team.themoment.readygsmserver.domain.user.dto.response.UserResDto;
 
 @Service
-public class UserService {
+public class QueryUserService {
 
-    public UserResDto getMe(OAuth2User user) {
+    public UserResDto execute(OAuth2User user) {
         Long id = ((Number) user.getAttribute("id")).longValue();
         String email = user.getAttribute("email");
         String role = user.getAttribute("role");
