@@ -240,7 +240,7 @@ new aws.ecr.LifecyclePolicy(`${prefix}-app-lifecycle`, {
     }),
 });
 
-// ── Route 53 A 레코드 (ready.hellogsm.kr) ────────────────
+// ── Route 53 A 레코드 (api.ready.hellogsm.kr) ────────────────
 const hostedZone = aws.route53.getZone({
     name: "hellogsm.kr",
     privateZone: false,
@@ -248,7 +248,7 @@ const hostedZone = aws.route53.getZone({
 
 new aws.route53.Record(`${prefix}-dns`, {
     zoneId: hostedZone.then((hz) => hz.zoneId),
-    name: "ready.hellogsm.kr",
+    name: "api.ready.hellogsm.kr",
     type: "A",
     ttl: 300,
     records: [eip.publicIp],
@@ -260,4 +260,4 @@ export const ec2InstanceId = ec2.id;
 export const ec2PublicIp = eip.publicIp;
 export const ecrRepositoryUrl = ecrRepo.repositoryUrl;
 export const ecrRepositoryName = ecrRepo.name;
-export const appDomain = "ready.hellogsm.kr";
+export const appDomain = "api.ready.hellogsm.kr";
