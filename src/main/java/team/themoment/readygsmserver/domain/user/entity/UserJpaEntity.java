@@ -39,7 +39,7 @@ public class UserJpaEntity {
         return UserJpaEntity.builder()
                 .email(email)
                 .authReferrerType(authReferrerType)
-                .role(Role.UNAUTHENTICATED)
+                .role(Role.USER)
                 .lastLoginTime(LocalDateTime.now())
                 .build();
     }
