@@ -1,15 +1,15 @@
 ---
 name: api-design
-description: REST API design guide for this project
+description: REST API design guide for new endpoints — RESTful URL structure, query parameter binding rules (@RequestParam vs @ModelAttribute), OpenAPI annotations, and CommonApiResponse usage.
 ---
 
 # REST API Design Guide
 
 ## URL Design
 
-- RESTful principles: `/v1/auth/token`, `/v1/students`
-- Use plural nouns: `/students`, `/users`
-- Hierarchy: `/students/{id}/records`
+- RESTful principles: `/v1/auth/api-keys`
+- Use plural: `/students`, `/clubs`
+- Hierarchy: `/students/{id}/projects`
 
 ## Query Parameters
 
@@ -19,16 +19,14 @@ description: REST API design guide for this project
 
 ## OpenAPI Documentation
 
-```java
-@Operation(summary = "학생 정보 조회", description = "학생 ID로 정보를 조회합니다.")
-@ApiResponse(responseCode = "200", description = "조회 성공")
-@GetMapping("/{id}")
-public StudentResDto findStudent(@PathVariable Long id) {
-    return studentService.findById(id);
-}
+```kotlin
+@Operation(summary = "Create API key", description = "...")
+@ApiResponse(responseCode = "200", description = "Success")
+@PostMapping("/api-keys")
+fun create(@Valid @RequestBody reqDto: CreateApiKeyReqDto): ApiKeyResDto
 ```
 
 ## Response Format
 
-- Success: Handled automatically by the-sdk (`CommonApiResponse` wrapper)
-- Error: Throw `ExpectedException(message, HttpStatus)` → SDK GlobalExceptionHandler processes it
+- Success: `CommonApiResponse(data = ...)`
+- Error: `ExpectedException` → Global Handler

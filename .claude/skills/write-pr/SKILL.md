@@ -1,70 +1,68 @@
 ---
-allowed-tools: Bash(git log:*), Bash(git diff:*), Bash(git branch:*), Bash(find:*), Read, Write
-description: Generate PR body and title suggestions
+name: write-pr
+description: Generate PR title, body, and labels from commits since the base branch, then create the PR on GitHub. Handles base branch detection, label selection, and PR creation end-to-end.
+allowed-tools: Bash(git *:*), Bash(bash *create-pr.sh:*), Bash(cat *:*), Read, Write
 ---
 
-## Context
+## Step 1 — Gather Context
 
-- Current branch: !`git branch --show-current`
-- Commits diff from master: !`git log master..HEAD --oneline`
-- File changes stats from master: !`git diff master...HEAD --stat`
-- Detailed changes from master: !`git diff master...HEAD`
-- PR template: Read `.github/PULL_REQUEST_TEMPLATE.md` file
-- Available domains: !`find src/main/java -mindepth 5 -maxdepth 5 -type d | sed 's|.*domain/||'`
+```bash
+git branch --show-current
+git log origin/develop..HEAD --oneline 2>/dev/null || git log --oneline -15
+git diff origin/develop...HEAD --stat 2>/dev/null || git diff HEAD~5...HEAD --stat
+git diff origin/develop...HEAD 2>/dev/null || git diff HEAD~5...HEAD
+```
 
-## PR Title Convention
+Also read the PR template:
 
-This project uses the following PR title format: `[scope] description`
+```bash
+cat .github/PULL_REQUEST_TEMPLATE.md
+```
 
-**Scope Selection Rule:**
-- Use domain names by default for feature-specific changes (discover from `src/main/java/.../domain/` directory structure above)
-- Only use `global` when changes affect multiple domains or cross-cutting concerns (e.g., config, security, common utilities)
-- Use `ci/cd` for build/deployment changes
+## Step 2 — Determine Labels
 
-**Recent PR Title Examples:**
-- `[global] 공통 예외 처리 로직 추가`
-- `[global] Swagger 설정 수정`
-- `[auth] JWT 토큰 발급 및 갱신 기능 구현`
-- `[ci/cd] GitHub Actions 빌드 파이프라인 추가`
-- `[student] 학생 정보 조회 API 구현`
+Read `${CLAUDE_SKILL_DIR}/references/labels.md` and select 1–2 appropriate labels based on the nature of the changes.
+Read `${CLAUDE_SKILL_DIR}/references/commit-conventions.md` for commit type and scope naming rules.
 
-## Your task
+## Step 3 — Generate PR Content
 
-Based on the above information, perform the following tasks:
+**Title** — Generate 3 options in the format `[scope] description`:
+- Scope: determine from changed file paths and directory structure — infer the domain from path segments. Use `[global]` / `[ci/cd]` for cross-cutting changes only. Wrap in brackets: `[auth]`, `[user]`, etc.
+- Description: Korean, concise, no emojis, max 50 characters total
+- Wrap class names, method names, annotations, file names, and technical terms in backticks (e.g., `@Transactional`, `QueryProjectServiceImpl`, `SKILL.md`)
 
-1. **PR Title Suggestions**:
-   - Suggest 3 appropriate titles based on the convention above
-   - Format: `[scope] description`
-   - Description: Korean, clear and concise
-   - No emojis
+**Body** — Follow the `.github/PULL_REQUEST_TEMPLATE.md` structure:
+- Korean 합쇼체: `~하였습니다`, `~되었습니다`, `~추가하였습니다`
+- No emojis
+- Max 2500 characters
+- Wrap all proper nouns and technical identifiers in backticks: class names, method names, annotations, file names, field names, config keys, module names, and agent names.
 
-2. **PR Body**:
-   - Follow the PR template structure
-   - Analyze commits and changes between master and current branch
-   - Total length must not exceed 2500 characters
-   - No emojis
-   - Write in Korean
-   - Be clear and specific
+## Step 4 — Write Body & Show Preview
 
-3. **Writing Style**:
-   - Use formal Korean ending style: "~하였습니다", "~되었습니다", "~추가하였습니다" (not "~했어요", "~합니다", "~했습니다")
+Write the body to `PR_BODY.md`, then display:
 
-4. **Save to file**:
-   - Save the content to `PR_BODY.md`
-   - Overwrite if file already exists
+```
+## PR 제목 후보
+1. [title1]
+2. [title2]
+3. [title3]
 
-5. **Output format**:
+## 선택된 라벨
+- label1, label2
 
-   ```
-   ## 추천 PR 제목
+## PR 본문 미리보기
+[body content]
+```
 
-   1. [title1]
-   2. [title2]
-   3. [title3]
+Use AskUserQuestion to ask the user which title to use (present options 1/2/3). Wait for the answer before proceeding.
 
-   ## PR 본문 (PR_BODY.md에 저장됨)
+## Step 5 — Create PR
 
-   [preview of generated content]
-   ```
+Run the creation script with the confirmed title and labels:
 
-You must use the Write tool to create PR_BODY.md file and show the user the title suggestions and body preview.
+```bash
+bash "${CLAUDE_SKILL_DIR}/scripts/create-pr.sh" "<confirmed-title>" "PR_BODY.md" "<label1>,<label2>"
+```
+
+After creation, display the PR URL.
+Cleanup: remove `PR_BODY.md`.
