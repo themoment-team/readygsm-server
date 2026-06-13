@@ -6,5 +6,5 @@ config:
   readygsm-infra:vpcCidr: "10.0.0.0/16"
   readygsm-infra:subnetCidr: "10.0.1.0/24"
   readygsm-infra:availabilityZone: ap-northeast-2a
-  readygsm-infra:dnsTtl: "300"
+  readygsm-infra:dnsTtl: 300
 encryptionsalt: v1:cVFTtUAH9oU=:v1:VZld0iCXc2gkK7iu:qVLSt2ipM9DdK7MVnw0TT7Eex41eVA==

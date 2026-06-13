@@ -3,7 +3,7 @@ import * as aws from "@pulumi/aws";
 
 // ── 설정 ──────────────────────────────────────────────────
 const config = new pulumi.Config();
-const env            = config.get("environment")     ?? "prod";
+const env            = config.require("environment");
 const instanceType   = config.get("ec2InstanceType") ?? "t3.small";
 const keyPairName    = config.require("ec2KeyPairName");
 const vpcCidr        = config.get("vpcCidr")         ?? "10.0.0.0/16";
