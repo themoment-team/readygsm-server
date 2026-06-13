@@ -3,16 +3,22 @@ import * as aws from "@pulumi/aws";
 
 // ── 설정 ──────────────────────────────────────────────────
 const config = new pulumi.Config();
-const env = config.get("environment") ?? "prod";
-const instanceType = config.get("ec2InstanceType") ?? "t3.small";
-const keyPairName = config.require("ec2KeyPairName");
+const env            = config.require("environment");
+const instanceType   = config.get("ec2InstanceType") ?? "t3.small";
+const keyPairName    = config.require("ec2KeyPairName");
+const vpcCidr        = config.get("vpcCidr")         ?? "10.0.0.0/16";
+const subnetCidr     = config.get("subnetCidr")      ?? "10.0.1.0/24";
+const az             = config.get("availabilityZone") ?? "ap-northeast-2a";
+const hostedZoneName = config.require("hostedZoneName");
+const appDomainName  = config.require("appDomain");
+const dnsTtl         = config.getNumber("dnsTtl")    ?? 300;
 
 const prefix = `readygsm-${env}`;
 const commonTags = { Project: "readygsm", Environment: env };
 
 // ── VPC ───────────────────────────────────────────────────
 const vpc = new aws.ec2.Vpc(`${prefix}-vpc`, {
-    cidrBlock: "10.0.0.0/16",
+    cidrBlock: vpcCidr,
     enableDnsHostnames: true,
     enableDnsSupport: true,
     tags: { ...commonTags, Name: `${prefix}-vpc` },
@@ -27,8 +33,8 @@ const igw = new aws.ec2.InternetGateway(`${prefix}-igw`, {
 // ── Public Subnet ─────────────────────────────────────────
 const publicSubnet = new aws.ec2.Subnet(`${prefix}-subnet-public`, {
     vpcId: vpc.id,
-    cidrBlock: "10.0.1.0/24",
-    availabilityZone: "ap-northeast-2a",
+    cidrBlock: subnetCidr,
+    availabilityZone: az,
     mapPublicIpOnLaunch: true,
     tags: { ...commonTags, Name: `${prefix}-subnet-public` },
 });
@@ -242,15 +248,15 @@ new aws.ecr.LifecyclePolicy(`${prefix}-app-lifecycle`, {
 
 // ── Route 53 A 레코드 (api.ready.hellogsm.kr) ────────────────
 const hostedZone = aws.route53.getZone({
-    name: "hellogsm.kr",
+    name: hostedZoneName,
     privateZone: false,
 });
 
 new aws.route53.Record(`${prefix}-dns`, {
     zoneId: hostedZone.then((hz) => hz.zoneId),
-    name: "api.ready.hellogsm.kr",
+    name: appDomainName,
     type: "A",
-    ttl: 300,
+    ttl: dnsTtl,
     records: [eip.publicIp],
 });
 
@@ -260,4 +266,4 @@ export const ec2InstanceId = ec2.id;
 export const ec2PublicIp = eip.publicIp;
 export const ecrRepositoryUrl = ecrRepo.repositoryUrl;
 export const ecrRepositoryName = ecrRepo.name;
-export const appDomain = "api.ready.hellogsm.kr";
+export const appDomain = appDomainName;

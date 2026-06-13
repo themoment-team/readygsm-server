@@ -25,6 +25,12 @@ jobs:
         with:
           java-version: "21"
           distribution: "temurin"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: infra/package-lock.json
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -42,6 +48,26 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Install Pulumi CLI
+        run: |
+          curl -fsSL https://get.pulumi.com | sh
+          echo "$HOME/.pulumi/bin" >> $GITHUB_PATH
+
+      - name: Install infra dependencies
+        working-directory: infra
+        run: npm ci
+
+      - name: Deploy infrastructure
+        working-directory: infra
+        run: |
+          pulumi stack select gsmthemoment-gmail-com/prod
+          pulumi up --yes \
+            --config "readygsm-infra:hostedZoneName=${{ secrets.HOSTED_ZONE_NAME }}" \
+            --config "readygsm-infra:appDomain=${{ secrets.APP_DOMAIN }}"
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
       - name: Build and push Docker image to ECR
         id: build-image
