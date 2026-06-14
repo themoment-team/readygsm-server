@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: infra/package-lock.json
 
@@ -85,7 +85,7 @@ jobs:
           echo "image_uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
 
       - name: Copy config files to EC2
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.PROD_SERVER_HOST }}
           username: ec2-user
@@ -95,7 +95,7 @@ jobs:
           target: "/home/ec2-user/readygsm-files/"
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.PROD_SERVER_HOST }}
           username: ec2-user
