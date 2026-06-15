@@ -25,6 +25,12 @@ jobs:
         with:
           java-version: "21"
           distribution: "temurin"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: infra/package-lock.json
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -43,6 +49,26 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Install Pulumi CLI
+        run: |
+          curl -fsSL https://get.pulumi.com | sh
+          echo "$HOME/.pulumi/bin" >> $GITHUB_PATH
+
+      - name: Install infra dependencies
+        working-directory: infra
+        run: npm ci
+
+      - name: Deploy infrastructure
+        working-directory: infra
+        run: |
+          pulumi stack select gsmthemoment-gmail-com/prod
+          pulumi up --yes \
+            --config "readygsm-infra:hostedZoneName=${{ secrets.HOSTED_ZONE_NAME }}" \
+            --config "readygsm-infra:appDomain=${{ secrets.APP_DOMAIN }}"
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
       - name: Build and push Docker image to ECR
         id: build-image
         env:
@@ -59,7 +85,7 @@ jobs:
           echo "image_uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
 
       - name: Copy config files to EC2
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.PROD_SERVER_HOST }}
           username: ec2-user
@@ -69,7 +95,7 @@ jobs:
           target: "/home/ec2-user/readygsm-files/"
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.PROD_SERVER_HOST }}
           username: ec2-user
