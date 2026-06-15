@@ -35,9 +35,7 @@ public class ApplyActivityService {
         }
 
         long currentApplicants = applicationRepository.countByActivity_Id(activityId);
-        if (currentApplicants >= activity.getMaxApplicant()) {
-            throw new ExpectedException("신청 정원이 초과되었습니다.", HttpStatus.BAD_REQUEST);
-        }
+        boolean isReserve = currentApplicants >= activity.getMaxApplicant();
 
         ApplicationJpaEntity saved = applicationRepository.save(
                 ApplicationJpaEntity.builder()
@@ -50,6 +48,7 @@ public class ApplyActivityService {
                         .schoolName(req.schoolName())
                         .phoneNumber(req.phoneNumber())
                         .familyPhoneNumber(req.familyPhoneNumber())
+                        .isReserve(isReserve)
                         .build()
         );
 
