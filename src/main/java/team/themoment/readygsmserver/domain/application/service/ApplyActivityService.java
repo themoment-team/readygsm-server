@@ -34,10 +34,9 @@ public class ApplyActivityService {
             throw new ExpectedException("이미 신청한 활동이 있습니다.", HttpStatus.CONFLICT);
         }
 
-        long currentApplicants = applicationRepository.countByActivity_Id(activityId);
-        if (currentApplicants >= activity.getMaxApplicant()) {
-            throw new ExpectedException("신청 정원이 초과되었습니다.", HttpStatus.BAD_REQUEST);
-        }
+        long currentMainApplicants = applicationRepository.countByActivity_IdAndIsReserve(activityId, false);
+        boolean hasReserve = applicationRepository.existsByActivity_IdAndIsReserve(activityId, true);
+        boolean isReserve = currentMainApplicants >= activity.getMaxApplicant() || hasReserve;
 
         ApplicationJpaEntity saved = applicationRepository.save(
                 ApplicationJpaEntity.builder()
@@ -50,6 +49,7 @@ public class ApplyActivityService {
                         .schoolName(req.schoolName())
                         .phoneNumber(req.phoneNumber())
                         .familyPhoneNumber(req.familyPhoneNumber())
+                        .isReserve(isReserve)
                         .build()
         );
 
