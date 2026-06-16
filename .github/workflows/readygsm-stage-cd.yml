@@ -20,13 +20,16 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,MYSQL_USERNAME,MYSQL_PASSWORD,REDIS_PASSWORD
           script: |
+            set -e
             export GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
             export GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
             export GOOGLE_REDIRECT_URI=$GOOGLE_REDIRECT_URI
             export MYSQL_USERNAME=$MYSQL_USERNAME
             export MYSQL_PASSWORD=$MYSQL_PASSWORD
             export REDIS_PASSWORD=$REDIS_PASSWORD
-            cd $HOME/Downloads/readygsm-server && git pull origin develop
+            cd $HOME/Downloads/readygsm-server
+            git fetch origin develop
+            git reset --hard origin/develop
             bash $HOME/Downloads/readygsm-server/scripts/stage/deploy.sh
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
