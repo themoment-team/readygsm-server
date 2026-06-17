@@ -64,7 +64,9 @@ jobs:
           pulumi stack select gsmthemoment-gmail-com/prod
           pulumi up --yes \
             --config "readygsm-infra:hostedZoneName=${{ secrets.HOSTED_ZONE_NAME }}" \
-            --config "readygsm-infra:appDomain=${{ secrets.APP_DOMAIN }}"
+            --config "readygsm-infra:appDomain=${{ secrets.APP_DOMAIN }}" \
+            --config "readygsm-infra:vercelCnameName=${{ secrets.VERCEL_CNAME_NAME }}" \
+            --config "readygsm-infra:vercelCnameTarget=${{ secrets.VERCEL_CNAME_TARGET }}"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}

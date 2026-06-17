@@ -260,6 +260,20 @@ new aws.route53.Record(`${prefix}-dns`, {
     records: [eip.publicIp],
 });
 
+// ── Route 53 CNAME 레코드 (Vercel 프론트엔드) ────────────────
+// 설정 방법: pulumi config set --secret readygsm-infra:vercelCnameName <name>
+//           pulumi config set --secret readygsm-infra:vercelCnameTarget <vercel-dns-value>
+const vercelCnameName   = config.require("vercelCnameName");
+const vercelCnameTarget = config.require("vercelCnameTarget");
+
+new aws.route53.Record(`${prefix}-vercel-cname`, {
+    zoneId: hostedZone.then((hz) => hz.zoneId),
+    name: pulumi.interpolate`${vercelCnameName}.${hostedZoneName}`,
+    type: "CNAME",
+    ttl: dnsTtl,
+    records: [vercelCnameTarget],
+});
+
 // ── Outputs ───────────────────────────────────────────────
 export const vpcId = vpc.id;
 export const ec2InstanceId = ec2.id;
