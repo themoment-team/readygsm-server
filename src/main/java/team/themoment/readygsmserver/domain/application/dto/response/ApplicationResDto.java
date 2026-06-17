@@ -12,7 +12,8 @@ public record ApplicationResDto(
         Integer number,
         String schoolName,
         String phoneNumber,
-        String familyPhoneNumber
+        String familyPhoneNumber,
+        boolean isReserve
 ) {
     public static ApplicationResDto from(ApplicationJpaEntity entity) {
         return new ApplicationResDto(
@@ -25,7 +26,8 @@ public record ApplicationResDto(
                 entity.getNumber(),
                 entity.getSchoolName(),
                 entity.getPhoneNumber(),
-                entity.getFamilyPhoneNumber()
+                entity.getFamilyPhoneNumber(),
+                entity.isReserve()
         );
     }
 }

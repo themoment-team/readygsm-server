@@ -53,6 +53,9 @@ public class ApplicationJpaEntity {
     @Column(name = "family_phone_number", nullable = false, length = 20)
     private String familyPhoneNumber;
 
+    @Column(name = "is_reserve", nullable = false)
+    private boolean isReserve;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
