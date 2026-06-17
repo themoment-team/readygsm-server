@@ -204,7 +204,7 @@ const ec2 = new aws.ec2.Instance(`${prefix}-ec2`, {
         httpTokens: "required", // IMDSv2 강제
     },
     tags: { ...commonTags, Name: `${prefix}-ec2` },
-});
+}, { ignoreChanges: ["ami", "rootBlockDevice"] });
 
 // ── Elastic IP ────────────────────────────────────────────
 const eip = new aws.ec2.Eip(`${prefix}-eip`, {
