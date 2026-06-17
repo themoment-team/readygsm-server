@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ValidationExceptionHandler {
 
+    private static final String DEFAULT_MESSAGE = "올바르지 않은 입력값입니다.";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public CommonApiResponse<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getAllErrors().stream()
@@ -42,13 +44,19 @@ public class ValidationExceptionHandler {
     }
 
     private String formatError(ObjectError error) {
+        // 메시지가 null이면 Collectors.joining의 StringJoiner가 NPE를 던져 500이 나므로 기본값으로 대체
+        String message = error.getDefaultMessage() != null ? error.getDefaultMessage() : DEFAULT_MESSAGE;
         if (error instanceof FieldError fieldError) {
-            return fieldError.getField() + ": " + fieldError.getDefaultMessage();
+            return fieldError.getField() + ": " + message;
         }
-        return error.getDefaultMessage();
+        return message;
     }
 
     private String formatViolation(ConstraintViolation<?> violation) {
-        return violation.getPropertyPath() + ": " + violation.getMessage();
+        // getPropertyPath()는 "메서드명.객체명.필드명" 형태이므로 마지막 필드명만 추출
+        String propertyPath = violation.getPropertyPath().toString();
+        String fieldName = propertyPath.substring(propertyPath.lastIndexOf('.') + 1);
+        String message = violation.getMessage() != null ? violation.getMessage() : DEFAULT_MESSAGE;
+        return fieldName + ": " + message;
     }
 }
