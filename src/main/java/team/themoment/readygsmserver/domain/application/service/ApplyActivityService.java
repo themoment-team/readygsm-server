@@ -34,7 +34,7 @@ public class ApplyActivityService {
                 .orElseThrow(() -> new ExpectedException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (user.getRole() == Role.USER) {
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
             if (now.isBefore(activity.getRegistrationStartAt()) || now.isAfter(activity.getRegistrationEndAt())) {
                 throw new ExpectedException("신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
             }
