@@ -56,6 +56,10 @@ public class ApplicationJpaEntity {
     @Column(name = "is_reserve", nullable = false)
     private boolean isReserve;
 
+    public void promote() {
+        this.isReserve = false;
+    }
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
