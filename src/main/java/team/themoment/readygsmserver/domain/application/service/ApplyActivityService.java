@@ -11,8 +11,11 @@ import team.themoment.readygsmserver.domain.application.dto.response.Application
 import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 import team.themoment.readygsmserver.domain.application.repository.ApplicationRepository;
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
+import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 import team.themoment.readygsmserver.domain.user.repository.UserRepository;
 import team.themoment.sdk.exception.ExpectedException;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,13 @@ public class ApplyActivityService {
 
         UserJpaEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ExpectedException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
+        if (user.getRole() == Role.USER) {
+            LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
+            if (now.isBefore(activity.getRegistrationStartAt()) || now.isAfter(activity.getRegistrationEndAt())) {
+                throw new ExpectedException("신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
+            }
+        }
 
         if (applicationRepository.existsByUser_Id(userId)) {
             throw new ExpectedException("이미 신청한 활동이 있습니다.", HttpStatus.CONFLICT);
