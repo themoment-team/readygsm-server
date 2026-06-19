@@ -15,7 +15,7 @@ public interface ApplicationRepository extends JpaRepository<ApplicationJpaEntit
     long countByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
     boolean existsByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
     Optional<ApplicationJpaEntity> findByActivity_IdAndUser_Id(Long activityId, Long userId);
-    Optional<ApplicationJpaEntity> findFirstByActivity_IdAndIsReserveTrueOrderByCreatedAtAsc(Long activityId);
+    Optional<ApplicationJpaEntity> findFirstByActivity_IdAndIsReserveTrueOrderByCreatedAtAscIdAsc(Long activityId);
 
     @Query("SELECT app.activity.id, COUNT(app) FROM ApplicationJpaEntity app GROUP BY app.activity.id")
     List<Object[]> countApplicantsGroupedByActivity();

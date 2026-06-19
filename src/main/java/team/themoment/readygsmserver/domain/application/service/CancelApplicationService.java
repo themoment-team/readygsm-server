@@ -23,7 +23,7 @@ public class CancelApplicationService {
         applicationRepository.delete(application);
 
         if (wasConfirmed) {
-            applicationRepository.findFirstByActivity_IdAndIsReserveTrueOrderByCreatedAtAsc(activityId)
+            applicationRepository.findFirstByActivity_IdAndIsReserveTrueOrderByCreatedAtAscIdAsc(activityId)
                     .ifPresent(ApplicationJpaEntity::promote);
         }
     }
