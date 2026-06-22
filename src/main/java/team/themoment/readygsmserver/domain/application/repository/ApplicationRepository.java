@@ -1,5 +1,6 @@
 package team.themoment.readygsmserver.domain.application.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,7 @@ public interface ApplicationRepository extends JpaRepository<ApplicationJpaEntit
     long countByActivity_Id(Long activityId);
     long countByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
     boolean existsByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
+    @EntityGraph(attributePaths = {"activity"})
     Optional<ApplicationJpaEntity> findByActivity_IdAndUser_Id(Long activityId, Long userId);
     Optional<ApplicationJpaEntity> findFirstByActivity_IdAndIsReserveTrueOrderByCreatedAtAscIdAsc(Long activityId);
 
