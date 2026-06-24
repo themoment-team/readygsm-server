@@ -32,6 +32,9 @@ public class DiscordNotificationService {
         }
         try {
             String detail = buildDetail(description, httpMethod, requestUri, clientIp, threadName, cause);
+            if (detail.length() > 4000) {
+                detail = detail.substring(0, 3997) + "...";
+            }
             DiscordWebhookPayload payload = DiscordWebhookPayload.serverError(title, detail);
             restClient.post()
                     .uri(webhookUrl)
