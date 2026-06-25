@@ -55,7 +55,8 @@ public class ExportApplicationExcelService {
                 reservedHeaderRow.createCell(i).setCellValue(HEADERS[i]);
             }
 
-            int sheetRow = 1, reserveSheetRow = 1;
+            int sheetRow = 1;
+            int reserveSheetRow = 1;
             for (ApplicationJpaEntity app : applications) {
                 if (app.isReserve()) {
                     createApplicationRow(reserveSheet, app, reserveSheetRow++);
