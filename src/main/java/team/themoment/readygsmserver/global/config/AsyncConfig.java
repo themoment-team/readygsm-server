@@ -25,12 +25,12 @@ public class AsyncConfig implements AsyncConfigurer {
         return RestClient.create();
     }
 
-    @Override
-    public Executor getAsyncExecutor() {
+    @Bean(name = "discordExecutor")
+    public Executor discordExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);
         executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(10);
+        executor.setQueueCapacity(50);
         executor.setThreadNamePrefix("discord-async-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
         executor.initialize();
