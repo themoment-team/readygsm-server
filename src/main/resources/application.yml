@@ -98,3 +98,6 @@ sdk:
     title: "ReadyGSM API"
     paths-to-match:
       - "/api/**"
+
+discord:
+  webhook-url: ${DISCORD_ERROR_WEBHOOK_URL:}
