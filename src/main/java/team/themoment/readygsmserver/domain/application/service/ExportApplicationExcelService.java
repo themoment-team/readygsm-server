@@ -46,26 +46,27 @@ public class ExportApplicationExcelService {
 
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("신청자 목록");
+            Sheet reserveSheet = workbook.createSheet("신청 대기자 목록");
 
             Row headerRow = sheet.createRow(0);
+            Row reservedHeaderRow = reserveSheet.createRow(0);
             for (int i = 0; i < HEADERS.length; i++) {
                 headerRow.createCell(i).setCellValue(HEADERS[i]);
+                reservedHeaderRow.createCell(i).setCellValue(HEADERS[i]);
             }
 
-            for (int i = 0; i < applications.size(); i++) {
-                ApplicationJpaEntity app = applications.get(i);
-                Row row = sheet.createRow(i + 1);
-                row.createCell(COL_NAME).setCellValue(app.getName());
-                row.createCell(COL_GRADE).setCellValue(app.getGrade());
-                row.createCell(COL_CLASS_NUMBER).setCellValue(app.getClassNumber());
-                row.createCell(COL_NUMBER).setCellValue(app.getNumber());
-                row.createCell(COL_SCHOOL_NAME).setCellValue(app.getSchoolName());
-                row.createCell(COL_PHONE_NUMBER).setCellValue(app.getPhoneNumber());
-                row.createCell(COL_FAMILY_PHONE_NUMBER).setCellValue(app.getFamilyPhoneNumber());
+            int sheetRow = 1, reserveSheetRow = 1;
+            for (ApplicationJpaEntity app : applications) {
+                if (app.isReserve()) {
+                    createApplicationRow(reserveSheet, app, reserveSheetRow++);
+                } else {
+                    createApplicationRow(sheet, app, sheetRow++);
+                }
             }
 
             for (int i = 0; i < COL_WIDTHS.length; i++) {
                 sheet.setColumnWidth(i, COL_WIDTHS[i]);
+                reserveSheet.setColumnWidth(i, COL_WIDTHS[i]);
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -74,5 +75,16 @@ public class ExportApplicationExcelService {
         } catch (IOException e) {
             throw new RuntimeException("엑셀 파일 생성에 실패했습니다.", e);
         }
+    }
+
+    private void createApplicationRow(Sheet sheet, ApplicationJpaEntity app, int rowIndex) {
+        Row row = sheet.createRow(rowIndex);
+        row.createCell(COL_NAME).setCellValue(app.getName());
+        row.createCell(COL_GRADE).setCellValue(app.getGrade());
+        row.createCell(COL_CLASS_NUMBER).setCellValue(app.getClassNumber());
+        row.createCell(COL_NUMBER).setCellValue(app.getNumber());
+        row.createCell(COL_SCHOOL_NAME).setCellValue(app.getSchoolName());
+        row.createCell(COL_PHONE_NUMBER).setCellValue(app.getPhoneNumber());
+        row.createCell(COL_FAMILY_PHONE_NUMBER).setCellValue(app.getFamilyPhoneNumber());
     }
 }
