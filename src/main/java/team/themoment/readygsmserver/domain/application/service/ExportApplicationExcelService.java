@@ -52,6 +52,9 @@ public class ExportApplicationExcelService {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
+    // 파일 시스템에서 금지하는 문자(\ / : * ? " < > |)와 제어 문자
+    private static final String ILLEGAL_FILE_NAME_CHARS = "[\\\\/:*?\"<>|\\x00-\\x1F]";
+
     private final ApplicationRepository applicationRepository;
     private final ActivityRepository activityRepository;
 
@@ -68,7 +71,15 @@ public class ExportApplicationExcelService {
 
     private String buildFileName(String activityName) {
         String timestamp = LocalDateTime.now(KST).format(FILE_NAME_TIMESTAMP_FORMATTER);
-        return activityName + "_" + timestamp + ".xlsx";
+        return sanitizeFileName(activityName) + "_" + timestamp + ".xlsx";
+    }
+
+    // 금지 문자를 공백으로 치환한 뒤 연속 공백과 양끝 공백을 정리한다
+    private String sanitizeFileName(String activityName) {
+        return activityName
+                .replaceAll(ILLEGAL_FILE_NAME_CHARS, " ")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private byte[] createExcel(List<ApplicationJpaEntity> applications) {
