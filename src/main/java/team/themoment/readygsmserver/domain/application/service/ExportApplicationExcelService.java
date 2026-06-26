@@ -4,13 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import team.themoment.sdk.exception.ExpectedException;
 import org.springframework.transaction.annotation.Transactional;
+import team.themoment.readygsmserver.domain.activity.entity.ActivityJpaEntity;
+import team.themoment.readygsmserver.domain.activity.repository.ActivityRepository;
+import team.themoment.readygsmserver.domain.application.dto.response.ExcelExportResult;
 import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 import team.themoment.readygsmserver.domain.application.repository.ApplicationRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -28,7 +36,6 @@ public class ExportApplicationExcelService {
     private static final int COL_PHONE_NUMBER = 5;
     private static final int COL_FAMILY_PHONE_NUMBER = 6;
 
-    // POI 컬럼 너비 단위: 1/256 문자 폭
     private static final int[] COL_WIDTHS = {
             10 * 256,  // 이름
             6 * 256,   // 학년
@@ -39,11 +46,40 @@ public class ExportApplicationExcelService {
             16 * 256   // 보호자 연락처
     };
 
-    private final ApplicationRepository applicationRepository;
+    private static final DateTimeFormatter FILE_NAME_TIMESTAMP_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    public byte[] execute(Long activityId) {
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
+    private static final String ILLEGAL_FILE_NAME_CHARS = "[\\\\/:*?\"<>|\\x00-\\x1F]";
+
+    private final ApplicationRepository applicationRepository;
+    private final ActivityRepository activityRepository;
+
+    public ExcelExportResult execute(Long activityId) {
+        ActivityJpaEntity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new ExpectedException("활동을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
         List<ApplicationJpaEntity> applications = applicationRepository.findAllByActivity_Id(activityId);
 
+        byte[] content = createExcel(applications);
+        String fileName = buildFileName(activity.getName());
+        return new ExcelExportResult(fileName, content);
+    }
+
+    private String buildFileName(String activityName) {
+        String timestamp = LocalDateTime.now(KST).format(FILE_NAME_TIMESTAMP_FORMATTER);
+        return sanitizeFileName(activityName) + "_" + timestamp + ".xlsx";
+    }
+
+    private String sanitizeFileName(String activityName) {
+        return activityName
+                .replaceAll(ILLEGAL_FILE_NAME_CHARS, " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
+    private byte[] createExcel(List<ApplicationJpaEntity> applications) {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("신청자 목록");
             Sheet reserveSheet = workbook.createSheet("신청 대기자 목록");
