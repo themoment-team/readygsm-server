@@ -145,6 +145,14 @@ const backupBucket = new aws.s3.BucketV2(`${prefix}-backup`, {
     tags: { ...commonTags, Name: `${prefix}-backup` },
 });
 
+new aws.s3.BucketPublicAccessBlock(`${prefix}-backup-public-access-block`, {
+    bucket: backupBucket.id,
+    blockPublicAcls: true,
+    blockPublicPolicy: true,
+    ignorePublicAcls: true,
+    restrictPublicBuckets: true,
+});
+
 new aws.s3.BucketLifecycleConfigurationV2(`${prefix}-backup-lifecycle`, {
     bucket: backupBucket.id,
     rules: [{

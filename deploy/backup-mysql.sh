@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 source /home/ec2-user/readygsm/.env
 
