@@ -10,7 +10,7 @@ import team.themoment.sdk.exception.ExpectedException;
 import org.springframework.transaction.annotation.Transactional;
 import team.themoment.readygsmserver.domain.activity.entity.ActivityJpaEntity;
 import team.themoment.readygsmserver.domain.activity.repository.ActivityRepository;
-import team.themoment.readygsmserver.domain.application.dto.response.ExcelExportResult;
+import team.themoment.readygsmserver.domain.application.dto.response.ExcelExportResDto;
 import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 import team.themoment.readygsmserver.domain.application.repository.ApplicationRepository;
 
@@ -56,7 +56,7 @@ public class ExportApplicationExcelService {
     private final ApplicationRepository applicationRepository;
     private final ActivityRepository activityRepository;
 
-    public ExcelExportResult execute(Long activityId) {
+    public ExcelExportResDto execute(Long activityId) {
         ActivityJpaEntity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new ExpectedException("활동을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
@@ -64,12 +64,12 @@ public class ExportApplicationExcelService {
 
         byte[] content = createExcel(applications);
         String fileName = buildFileName(activity.getName());
-        return new ExcelExportResult(fileName, content);
+        return new ExcelExportResDto(fileName, content);
     }
 
     private String buildFileName(String activityName) {
         String timestamp = LocalDateTime.now(KST).format(FILE_NAME_TIMESTAMP_FORMATTER);
-        return sanitizeFileName(activityName) + "_" + timestamp + ".xlsx";
+        return sanitizeFileName(activityName) + "-" + timestamp + ".xlsx";
     }
 
     private String sanitizeFileName(String activityName) {

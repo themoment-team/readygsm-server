@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import team.themoment.readygsmserver.domain.application.dto.request.ApplicationReqDto;
 import team.themoment.readygsmserver.domain.application.dto.response.ApplicationResDto;
-import team.themoment.readygsmserver.domain.application.dto.response.ExcelExportResult;
+import team.themoment.readygsmserver.domain.application.dto.response.ExcelExportResDto;
 import team.themoment.readygsmserver.domain.application.service.ApplyActivityService;
 import team.themoment.readygsmserver.domain.application.service.CancelApplicationService;
 import team.themoment.readygsmserver.domain.application.service.DeleteApplicationService;
@@ -104,7 +104,7 @@ public class ApplicationController {
     })
     @GetMapping("/admin/excel")
     public ResponseEntity<byte[]> exportExcel(@RequestParam Long activityId) {
-        ExcelExportResult result = exportApplicationExcelService.execute(activityId);
+        ExcelExportResDto result = exportApplicationExcelService.execute(activityId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
