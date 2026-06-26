@@ -1,5 +1,6 @@
 ---
-description: Java + Spring Boot 4.0 architecture detailed guide
+name: java-spring-arch
+description: Architecture reference for Java + Spring Boot 4.0 projects — Controller/Service/Repository layer responsibilities, @Transactional strategy (readOnly optimization, N+1 prevention), ExpectedException usage, and Entity↔DTO conversion patterns.
 ---
 
 # Java + Spring Boot Architecture Guide
@@ -51,7 +52,7 @@ List<Entity> findAllWithRelated();
 ## Exception Handling
 
 ```java
-throw new ExpectedException("학생을 찾을 수 없습니다", HttpStatus.NOT_FOUND);
+throw new ExpectedException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 ```
 
 ## DTO Conversion Pattern
