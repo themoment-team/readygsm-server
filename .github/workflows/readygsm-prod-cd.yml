@@ -93,7 +93,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "deploy/compose.prod.yml,docker/nginx.conf"
+          source: "deploy/compose.prod.yml,deploy/backup-mysql.sh,docker/nginx.conf"
           target: "/home/ec2-user/readygsm-files/"
 
       - name: Deploy to EC2
@@ -111,6 +111,11 @@ jobs:
             cp /home/ec2-user/readygsm-files/deploy/compose.prod.yml /home/ec2-user/readygsm/compose.prod.yml
             mkdir -p /home/ec2-user/readygsm/nginx
             cp /home/ec2-user/readygsm-files/docker/nginx.conf /home/ec2-user/readygsm/nginx/nginx.conf
+            cp /home/ec2-user/readygsm-files/deploy/backup-mysql.sh /home/ec2-user/readygsm/backup-mysql.sh
+            chmod +x /home/ec2-user/readygsm/backup-mysql.sh
+
+            # cron job 등록 (중복 방지)
+            (crontab -l 2>/dev/null | grep -v "backup-mysql"; echo "0 3 * * * /home/ec2-user/readygsm/backup-mysql.sh >> /var/log/mysql-backup.log 2>&1") | crontab -
 
             cd /home/ec2-user/readygsm
 
