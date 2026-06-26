@@ -8,12 +8,20 @@ overrides:
   claude/hooks/secret-guard: true
   claude/hooks/command-guard: true
   claude/hooks/logging: true
+  claude/skills/kotest-guide: false
+  claude/skills/kotlin-spring-arch: false
+  claude/agents/kotlin-convention-validator: false
+  claude/agents/kotlin-test-fixer: false
+  claude/hooks/gradle-test: true
 
   codex/hooks/dispatcher: true
   codex/hooks-json: true
   codex/hooks/secret-guard: true
   codex/hooks/command-guard: true
   codex/hooks/logging: true
+  codex/skills/kotest-guide: false
+  codex/skills/kotlin-spring-arch: false
+  codex/hooks/gradle-test: true
 
 branch_prefix: update/
 base_branch: develop
