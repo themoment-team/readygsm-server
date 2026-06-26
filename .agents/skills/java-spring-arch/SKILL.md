@@ -1,6 +1,6 @@
 ---
 name: java-spring-arch
-description: Java + Spring Boot 4.0 architecture detailed guide for this project
+description: Architecture reference for Java + Spring Boot 4.0 projects — Controller/Service/Repository layer responsibilities, @Transactional strategy (readOnly optimization, N+1 prevention), ExpectedException usage, and Entity↔DTO conversion patterns.
 ---
 
 # Java + Spring Boot Architecture Guide
@@ -11,10 +11,11 @@ description: Java + Spring Boot 4.0 architecture detailed guide for this project
 - Role: Request validation, DTO conversion, HTTP response
 - Annotations: `@RestController`, `@RequestMapping`
 - Validation: `@Valid`, `@Validated`
-- Response: Return DTO directly (SDK wrapper auto-wraps with `CommonApiResponse`)
+- Response: Use `CommonApiResponse` wrapper
 
 ### Service
 - Role: Business logic, transaction management
+- Pattern: interface + implementation
 - Transaction:
   - Read: `@Transactional(readOnly = true)`
   - Write: `@Transactional`
@@ -32,8 +33,8 @@ description: Java + Spring Boot 4.0 architecture detailed guide for this project
 @Transactional(readOnly = true)
 public List<StudentResDto> findStudents() {
     return repository.findAll().stream()
-            .map(StudentResDto::from)
-            .toList();
+        .map(StudentResDto::from)
+        .toList();
 }
 ```
 
@@ -41,25 +42,18 @@ public List<StudentResDto> findStudents() {
 ```java
 // ❌ N+1 occurs
 repository.findAll(); // 1 query
-entity.getRelatedEntity(); // N queries
+entity.getRelatedEntities(); // N queries
 
 // ✅ Fetch Join
-@Query("SELECT e FROM Entity e JOIN FETCH e.relatedEntity")
+@Query("SELECT e FROM Entity e JOIN FETCH e.relatedEntities")
 List<Entity> findAllWithRelated();
 ```
 
 ## Exception Handling
 
-### Custom Exception
-Do NOT create subclasses of `ExpectedException`. Instantiate it directly:
 ```java
-studentRepository.findById(id).orElseThrow(() ->
-    new ExpectedException("Student not found. studentId: " + id, HttpStatus.NOT_FOUND)
-);
+throw new ExpectedException("학생을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 ```
-
-### Global Handler
-See `src/main/java/team/themoment/readygsmserver/global/` — the SDK's built-in `GlobalExceptionHandler` handles `ExpectedException` automatically
 
 ## DTO Conversion Pattern
 
@@ -67,10 +61,5 @@ See `src/main/java/team/themoment/readygsmserver/global/` — the SDK's built-in
 // Entity → ResDto (static factory)
 public static StudentResDto from(Student student) {
     return new StudentResDto(student.getId(), student.getName());
-}
-
-// ReqDto → Entity
-public Student toEntity() {
-    return new Student(this.name);
 }
 ```
