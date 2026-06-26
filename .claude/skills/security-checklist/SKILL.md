@@ -1,6 +1,5 @@
 ---
-name: security-checklist
-description: Verify security vulnerabilities — hardcoded secrets, SQL injection, JWT validation, API key masking, sensitive logging, and authorization checks. Run before merging any auth or API-related changes.
+description: Security checklist and vulnerability verification
 ---
 
 # Security Checklist
@@ -54,9 +53,5 @@ grep -rE "['\"]([A-Za-z0-9+/]{40,}={0,2})['\"]" --include="*.kt"
 
 ## References
 
-Locate reference files at runtime:
-
-```bash
-find . -name "ApiKeyService.kt" ! -path "*/build/*"
-find . -type d -name "security" -path "*/main/*" ! -path "*/build/*"
-```
+- `datagsm-oauth-authorization/.../auth/service/ApiKeyService.kt` - API Key security example
+- `datagsm-common/.../global/common/security/` - Security configuration

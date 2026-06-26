@@ -1,6 +1,5 @@
 ---
-name: migration-guide
-description: Guide for DB schema changes and Entity modifications — impact analysis, correct change order (Entity → DTO → Repository → Service → Tests), JPA DDL strategy, and 2-phase column deletion.
+description: DB migration and schema change guide
 ---
 
 # DB Migration Guide
@@ -14,7 +13,7 @@ description: Guide for DB schema changes and Entity modifications — impact ana
 
 ## Change Order
 
-1. **Modify Entity**: locate domain directory with `find . -type d -name "domain" -path "*/main/*" ! -path "*/build/*"`
+1. **Modify Entity**: `team.themoment.readygsmserver.domain.{domain}.domain/`
 2. **Modify DTO**: ReqDto, ResDto
 3. **Modify Repository**: Adjust QueryDSL queries if needed
 4. **Modify Service**: Update business logic

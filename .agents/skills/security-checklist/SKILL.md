@@ -1,6 +1,6 @@
 ---
 name: security-checklist
-description: Verify security vulnerabilities — hardcoded secrets, SQL injection, JWT validation, API key masking, sensitive logging, and authorization checks. Run before merging any auth or API-related changes.
+description: Security checklist and vulnerability verification for this project
 ---
 
 # Security Checklist
@@ -13,23 +13,14 @@ description: Verify security vulnerabilities — hardcoded secrets, SQL injectio
 
 Verification commands:
 ```bash
-# Basic search in Kotlin files
-grep -r "password.*=.*\"" --include="*.kt"
-grep -r "secret.*=.*\"" --include="*.kt"
-grep -r "apiKey.*=.*\"" --include="*.kt"
+# Basic search in Java files
+grep -r "password.*=.*\"" --include="*.java"
+grep -r "secret.*=.*\"" --include="*.java"
+grep -r "apiKey.*=.*\"" --include="*.java"
 
 # Check YAML/Properties files
 grep -r "password\|secret\|apiKey" --include="*.yml" --include="*.yaml" --include="*.properties"
-
-# Check for base64 encoded strings (potential secrets)
-grep -rE "['\"]([A-Za-z0-9+/]{40,}={0,2})['\"]" --include="*.kt"
 ```
-
-**Limitations:**
-- May miss secrets encoded in base64 or other formats
-- May not detect secrets loaded from external sources at runtime
-- May not find secrets in configuration files outside the codebase
-- Manual review is still recommended for sensitive areas
 
 ### 2. SQL Injection
 - [ ] Using PreparedStatement or JPA/QueryDSL?
@@ -54,9 +45,5 @@ grep -rE "['\"]([A-Za-z0-9+/]{40,}={0,2})['\"]" --include="*.kt"
 
 ## References
 
-Locate reference files at runtime:
-
-```bash
-find . -name "ApiKeyService.kt" ! -path "*/build/*"
-find . -type d -name "security" -path "*/main/*" ! -path "*/build/*"
-```
+- `src/main/java/team/themoment/readygsmserver/global/security/` - Security configuration (JWT, OAuth2)
+- `src/main/java/team/themoment/readygsmserver/global/security/jwt/JwtFilter.java` - JWT verification example
