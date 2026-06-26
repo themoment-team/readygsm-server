@@ -36,7 +36,6 @@ public class ExportApplicationExcelService {
     private static final int COL_PHONE_NUMBER = 5;
     private static final int COL_FAMILY_PHONE_NUMBER = 6;
 
-    // POI 컬럼 너비 단위: 1/256 문자 폭
     private static final int[] COL_WIDTHS = {
             10 * 256,  // 이름
             6 * 256,   // 학년
@@ -52,7 +51,6 @@ public class ExportApplicationExcelService {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
-    // 파일 시스템에서 금지하는 문자(\ / : * ? " < > |)와 제어 문자
     private static final String ILLEGAL_FILE_NAME_CHARS = "[\\\\/:*?\"<>|\\x00-\\x1F]";
 
     private final ApplicationRepository applicationRepository;
@@ -74,7 +72,6 @@ public class ExportApplicationExcelService {
         return sanitizeFileName(activityName) + "_" + timestamp + ".xlsx";
     }
 
-    // 금지 문자를 공백으로 치환한 뒤 연속 공백과 양끝 공백을 정리한다
     private String sanitizeFileName(String activityName) {
         return activityName
                 .replaceAll(ILLEGAL_FILE_NAME_CHARS, " ")
