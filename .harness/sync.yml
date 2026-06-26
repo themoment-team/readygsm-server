@@ -21,6 +21,8 @@ overrides:
   codex/hooks/logging: true
   codex/skills/kotest-guide: false
   codex/skills/kotlin-spring-arch: false
+  codex/agents/kotlin-convention-validator: false
+  codex/agents/kotlin-test-fixer: false
   codex/hooks/gradle-test: true
 
 branch_prefix: update/
