@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,6 @@ import team.themoment.readygsmserver.domain.application.service.QueryApplication
 import team.themoment.readygsmserver.domain.application.service.QueryMyApplicationsService;
 import team.themoment.readygsmserver.global.security.annotation.AuthRequest;
 
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -106,12 +106,13 @@ public class ApplicationController {
     public ResponseEntity<byte[]> exportExcel(@RequestParam Long activityId) {
         ExcelExportResDto result = exportApplicationExcelService.execute(activityId);
 
-        String encodedFileName = URLEncoder.encode(result.fileName(), StandardCharsets.UTF_8).replace("+", "%20");
-        String contentDisposition = "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName;
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename(result.fileName(), StandardCharsets.UTF_8)
+                        .build()
+        );
 
         return ResponseEntity.ok().headers(headers).body(result.content());
     }
