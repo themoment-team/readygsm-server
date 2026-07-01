@@ -109,7 +109,9 @@ public class ApplicationController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.setContentDisposition(
-                ContentDisposition.attachment().filename(result.fileName(), StandardCharsets.UTF_8).build()
+                ContentDisposition.attachment()
+                        .filename(result.fileName(), StandardCharsets.UTF_8)
+                        .build()
         );
 
         return ResponseEntity.ok().headers(headers).body(result.content());
