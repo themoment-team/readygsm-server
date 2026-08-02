@@ -88,6 +88,7 @@ class ApplyActivityServiceTest {
         ApplicationResDto result = applyActivityService.execute(USER_ID, ACTIVITY_ID, req);
 
         assertThat(result.isReserve()).isFalse();
+        assertThat(result.reserveOrder()).isNull();
     }
 
     @Test
@@ -98,6 +99,7 @@ class ApplyActivityServiceTest {
         ApplicationResDto result = applyActivityService.execute(USER_ID, ACTIVITY_ID, req);
 
         assertThat(result.isReserve()).isTrue();
+        assertThat(result.reserveOrder()).isEqualTo(3);
         verify(applicationRepository).save(any(ApplicationJpaEntity.class));
     }
 
