@@ -69,6 +69,7 @@ public class ApplyActivityService {
                         .build()
         );
 
-        return ApplicationResDto.from(saved);
+        Integer reserveOrder = isReserve ? (int) currentReserveApplicants + 1 : null;
+        return ApplicationResDto.from(saved, reserveOrder);
     }
 }
