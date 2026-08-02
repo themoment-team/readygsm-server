@@ -14,7 +14,6 @@ public interface ApplicationRepository extends JpaRepository<ApplicationJpaEntit
     boolean existsByUser_Id(Long userId);
     long countByActivity_Id(Long activityId);
     long countByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
-    boolean existsByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
     @EntityGraph(attributePaths = {"activity"})
     Optional<ApplicationJpaEntity> findByActivity_IdAndUser_Id(Long activityId, Long userId);
     Optional<ApplicationJpaEntity> findFirstByActivity_IdAndIsReserveTrueOrderByCreatedAtAscIdAsc(Long activityId);
