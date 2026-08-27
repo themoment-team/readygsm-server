@@ -1,8 +1,77 @@
 services:
   app:
     build:
-      context: ..
+      context: .
       dockerfile: docker/stage.Dockerfile
     container_name: readygsm-app
     ports:
-      - "10101:8080"
+      - "80:8080"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USERNAME=${STAGE_MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${STAGE_MYSQL_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${STAGE_REDIS_PASSWORD}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+    networks:
+      - gsmsv-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: readygsm-mysql
+    environment:
+      - MYSQL_DATABASE=readygsm
+      - MYSQL_USER=${STAGE_MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${STAGE_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${STAGE_MYSQL_ROOT_PASSWORD}
+      - TZ=Asia/Seoul
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${STAGE_MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: always
+    networks:
+      - gsmsv-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: readygsm-redis
+    command: >
+      redis-server
+      --requirepass ${STAGE_REDIS_PASSWORD}
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${STAGE_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - gsmsv-net
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  gsmsv-net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: "1400"

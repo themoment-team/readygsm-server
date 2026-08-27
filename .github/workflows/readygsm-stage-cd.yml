@@ -6,35 +6,78 @@ on:
       - develop
   workflow_dispatch:
 
+env:
+  GSMSV_HOST: ssh.gsmsv.site
+  GSMSV_USER: ubuntu
+  DEPLOY_DIR: /home/ubuntu/readygsm-stage
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
-          envs: GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GOOGLE_REDIRECT_URI,MYSQL_USERNAME,MYSQL_PASSWORD,REDIS_PASSWORD
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build JAR
+        run: ./gradlew bootJar -x test --no-daemon
+
+      - name: Copy deploy files to GSMSV VM
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ env.GSMSV_HOST }}
+          username: ${{ env.GSMSV_USER }}
+          key: ${{ secrets.STAGE_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.STAGE_SSH_PORT }}
+          source: "deploy/compose.stage.yml,docker/stage.Dockerfile,build/libs/*.jar"
+          target: "${{ env.DEPLOY_DIR }}-files/"
+
+      - name: Deploy to GSMSV VM
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ env.GSMSV_HOST }}
+          username: ${{ env.GSMSV_USER }}
+          key: ${{ secrets.STAGE_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.STAGE_SSH_PORT }}
+          envs: STAGE_MYSQL_USERNAME,STAGE_MYSQL_PASSWORD,STAGE_MYSQL_ROOT_PASSWORD,STAGE_REDIS_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET
           script: |
             set -e
-            export GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-            export GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-            export GOOGLE_REDIRECT_URI=$GOOGLE_REDIRECT_URI
-            export MYSQL_USERNAME=$MYSQL_USERNAME
-            export MYSQL_PASSWORD=$MYSQL_PASSWORD
-            export REDIS_PASSWORD=$REDIS_PASSWORD
-            cd $HOME/Downloads/readygsm-server
-            git fetch origin develop
-            git reset --hard origin/develop
-            bash $HOME/Downloads/readygsm-server/scripts/stage/deploy.sh
+
+            mkdir -p $HOME/readygsm-stage/docker $HOME/readygsm-stage/build/libs
+            cp $HOME/readygsm-stage-files/deploy/compose.stage.yml $HOME/readygsm-stage/compose.stage.yml
+            cp $HOME/readygsm-stage-files/docker/stage.Dockerfile $HOME/readygsm-stage/docker/stage.Dockerfile
+            cp $HOME/readygsm-stage-files/build/libs/*.jar $HOME/readygsm-stage/build/libs/
+
+            cd $HOME/readygsm-stage
+
+            cat > .env << ENVEOF
+            STAGE_MYSQL_USERNAME=$STAGE_MYSQL_USERNAME
+            STAGE_MYSQL_PASSWORD=$STAGE_MYSQL_PASSWORD
+            STAGE_MYSQL_ROOT_PASSWORD=$STAGE_MYSQL_ROOT_PASSWORD
+            STAGE_REDIS_PASSWORD=$STAGE_REDIS_PASSWORD
+            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+            KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
+            KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
+            ENVEOF
+
+            docker compose -f compose.stage.yml --env-file .env up -d --build
+            docker image prune -f
         env:
+          STAGE_MYSQL_USERNAME: ${{ secrets.STAGE_MYSQL_USERNAME }}
+          STAGE_MYSQL_PASSWORD: ${{ secrets.STAGE_MYSQL_PASSWORD }}
+          STAGE_MYSQL_ROOT_PASSWORD: ${{ secrets.STAGE_MYSQL_ROOT_PASSWORD }}
+          STAGE_REDIS_PASSWORD: ${{ secrets.STAGE_REDIS_PASSWORD }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
-          MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
