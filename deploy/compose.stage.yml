@@ -49,10 +49,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: readygsm-redis
-    command: >
-      redis-server
-      --requirepass ${STAGE_REDIS_PASSWORD}
-      --appendonly yes
+    command: ["redis-server", "--requirepass", "${STAGE_REDIS_PASSWORD}", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
     healthcheck:
