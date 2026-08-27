@@ -58,19 +58,12 @@ jobs:
             cp $HOME/readygsm-stage-files/build/libs/*.jar $HOME/readygsm-stage/build/libs/
 
             cd $HOME/readygsm-stage
+            rm -f .env
 
-            cat > .env << ENVEOF
-            STAGE_MYSQL_USERNAME=$STAGE_MYSQL_USERNAME
-            STAGE_MYSQL_PASSWORD=$STAGE_MYSQL_PASSWORD
-            STAGE_MYSQL_ROOT_PASSWORD=$STAGE_MYSQL_ROOT_PASSWORD
-            STAGE_REDIS_PASSWORD=$STAGE_REDIS_PASSWORD
-            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-            KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
-            KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
-            ENVEOF
+            export STAGE_MYSQL_USERNAME STAGE_MYSQL_PASSWORD STAGE_MYSQL_ROOT_PASSWORD STAGE_REDIS_PASSWORD
+            export GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET KAKAO_CLIENT_ID KAKAO_CLIENT_SECRET
 
-            docker compose -f compose.stage.yml --env-file .env up -d --build
+            docker compose -f compose.stage.yml up -d --build
             docker image prune -f
         env:
           STAGE_MYSQL_USERNAME: ${{ secrets.STAGE_MYSQL_USERNAME }}
