@@ -19,7 +19,7 @@ services:
     container_name: readygsm-stage-certbot
     volumes:
       - certbot_conf:/etc/letsencrypt
-    entrypoint: "true"
+    command: ["certificates"]
 
   app:
     build:

@@ -44,3 +44,6 @@ PR_BODY.md
 infra/node_modules/
 infra/bin/
 infra/.pulumi/
+
+### Secrets ###
+deploy/.certbot-env
