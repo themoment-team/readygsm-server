@@ -1,11 +1,33 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: readygsm-stage-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/stage.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot_conf:/etc/nginx/certs:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      - app
+    restart: always
+    networks:
+      - gsmsv-net
+
+  certbot:
+    image: certbot/certbot
+    container_name: readygsm-stage-certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: "true"
+
   app:
     build:
       context: .
       dockerfile: docker/stage.Dockerfile
     container_name: readygsm-app
-    ports:
-      - "80:8080"
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_USERNAME=${STAGE_MYSQL_USERNAME}
@@ -65,6 +87,10 @@ volumes:
   mysql_data:
     driver: local
   redis_data:
+    driver: local
+  certbot_conf:
+    driver: local
+  certbot_www:
     driver: local
 
 networks:
