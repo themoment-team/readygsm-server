@@ -38,7 +38,7 @@ jobs:
           username: ${{ env.GSMSV_USER }}
           key: ${{ secrets.STAGE_SSH_PRIVATE_KEY }}
           port: ${{ secrets.STAGE_SSH_PORT }}
-          source: "deploy/compose.stage.yml,docker/stage.Dockerfile,build/libs/*.jar"
+          source: "deploy/compose.stage.yml,docker/stage.Dockerfile,docker/nginx-stage.conf,build/libs/*.jar"
           target: "${{ env.DEPLOY_DIR }}-files/"
 
       - name: Deploy to GSMSV VM
@@ -52,9 +52,10 @@ jobs:
           script: |
             set -e
 
-            mkdir -p $HOME/readygsm-stage/docker $HOME/readygsm-stage/build/libs
+            mkdir -p $HOME/readygsm-stage/docker $HOME/readygsm-stage/build/libs $HOME/readygsm-stage/nginx
             cp $HOME/readygsm-stage-files/deploy/compose.stage.yml $HOME/readygsm-stage/compose.stage.yml
             cp $HOME/readygsm-stage-files/docker/stage.Dockerfile $HOME/readygsm-stage/docker/stage.Dockerfile
+            cp $HOME/readygsm-stage-files/docker/nginx-stage.conf $HOME/readygsm-stage/nginx/stage.conf
             cp $HOME/readygsm-stage-files/build/libs/*.jar $HOME/readygsm-stage/build/libs/
 
             cd $HOME/readygsm-stage
