@@ -84,6 +84,7 @@ sdk:
       - "/swagger-ui/**"
       - "/api/v1/auth/callback"
       - "/api/test-sse"
+      - "/api/chat"
 
   response:
     enabled: true
@@ -94,6 +95,7 @@ sdk:
       - "/swagger-ui.html"
       - "/api/v1/application/admin/excel"
       - "/api/test-sse"
+      - "/api/chat"
 
   exception:
     enabled: true
