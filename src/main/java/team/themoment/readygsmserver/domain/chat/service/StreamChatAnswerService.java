@@ -27,7 +27,16 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * 질문을 받아 답변을 SSE로 흘려보낸다.
  *
- * <p>AI 응답은 도착하는 즉시 재전송한다. 어디에서도 모았다가 한 번에 보내지 않는다.
+ * <p>처리 순서는 다음과 같다.
+ * <ol>
+ *   <li>Redis에서 이전 대화를 조회한다</li>
+ *   <li>시스템 프롬프트와 메시지 배열을 조립한다</li>
+ *   <li>이번 질문을 Redis에 저장한다</li>
+ *   <li>토큰을 받는 즉시 전송하면서 동시에 버퍼에 누적한다</li>
+ *   <li>정상 완료면 버퍼를 저장하고, 중단되면 버퍼를 버린다</li>
+ * </ol>
+ *
+ * <p>버퍼는 저장용일 뿐이다. 전송은 언제나 즉시이며 어디에서도 모았다가 한 번에 보내지 않는다.
  */
 @Slf4j
 @Service
@@ -50,6 +59,13 @@ public class StreamChatAnswerService {
             throw new ExpectedException("만료되었거나 존재하지 않는 채팅 세션입니다.", HttpStatus.NOT_FOUND);
         }
 
+        List<ChatMessage> history = conversationRepository.findMessages(sessionId);
+        String systemPrompt = chatPromptAssembler.assembleSystemPrompt(req.message());
+        List<ChatMessage> messages = chatPromptAssembler.assembleMessages(history, req.message());
+        chatPromptAssembler.logAssembled(systemPrompt, messages);
+
+        conversationRepository.append(sessionId, ChatMessage.user(req.message()));
+
         SseEmitter emitter = new SseEmitter(EMITTER_TIMEOUT_MILLIS);
         ChatStream stream = new ChatStream(sessionId, emitter);
 
@@ -62,10 +78,6 @@ public class StreamChatAnswerService {
             log.info("[CHAT] 응답 스트림 오류 sessionId={}", sessionId);
             stream.release();
         });
-
-        String systemPrompt = chatPromptAssembler.assembleSystemPrompt(req.message());
-        List<ChatMessage> messages = chatPromptAssembler.assembleMessages(List.of(), req.message());
-        chatPromptAssembler.logAssembled(systemPrompt, messages);
 
         stream.start(systemPrompt, messages);
 
@@ -86,6 +98,9 @@ public class StreamChatAnswerService {
         private final AtomicBoolean finished = new AtomicBoolean(false);
         private final AtomicReference<StreamSubscription> subscription = new AtomicReference<>();
         private final AtomicReference<ScheduledFuture<?>> heartbeat = new AtomicReference<>();
+
+        /** 저장용 누적 버퍼. 전송과는 무관하다. */
+        private final StringBuilder answer = new StringBuilder();
 
         private ChatStream(String sessionId, SseEmitter emitter) {
             this.sessionId = sessionId;
@@ -109,6 +124,7 @@ public class StreamChatAnswerService {
 
         @Override
         public void onToken(String token) {
+            answer.append(token);
             send(SseEmitter.event().data(token));
         }
 
@@ -117,6 +133,7 @@ public class StreamChatAnswerService {
             if (!finished.compareAndSet(false, true)) {
                 return;
             }
+            saveAnswer();
             send(SseEmitter.event().name("done").data(new ChatDoneResDto(finishReason)));
             stopHeartbeat();
             emitter.complete();
@@ -127,10 +144,18 @@ public class StreamChatAnswerService {
             if (!finished.compareAndSet(false, true)) {
                 return;
             }
-            log.warn("[CHAT] 응답 생성 실패 sessionId={}", sessionId, e);
+            log.warn("[CHAT] 응답 생성 실패, 답변을 저장하지 않습니다 sessionId={}", sessionId, e);
             send(SseEmitter.event().name("error").data(new ChatErrorResDto(ERROR_REASON_UPSTREAM_INTERRUPTED)));
             stopHeartbeat();
             emitter.complete();
+        }
+
+        /** 정상 완료된 답변만 저장한다. 중단된 답변은 버퍼째 버린다. */
+        private void saveAnswer() {
+            if (answer.isEmpty()) {
+                return;
+            }
+            conversationRepository.append(sessionId, ChatMessage.assistant(answer.toString()));
         }
 
         private void sendHeartbeat() {

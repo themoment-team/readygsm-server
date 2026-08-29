@@ -67,10 +67,11 @@ public class ChatPromptAssembler {
      *
      * <p>이력 끝에 답변 없는 질문이 남아 있으면 버린다. 이전 요청이 중간에 끊겨
      * 질문만 저장된 경우인데, 그대로 두면 같은 질문이 연달아 두 번 들어간다.
+     * 연속으로 실패하면 답변 없는 질문이 여러 개 쌓일 수 있으므로 끝에서부터 모두 걷어낸다.
      */
     public List<ChatMessage> assembleMessages(List<ChatMessage> history, String userQuestion) {
         List<ChatMessage> messages = new ArrayList<>(history);
-        if (!messages.isEmpty() && messages.getLast().role() == ChatRole.USER) {
+        while (!messages.isEmpty() && messages.getLast().role() == ChatRole.USER) {
             messages.removeLast();
         }
         if (messages.size() > MAX_HISTORY_MESSAGES) {
