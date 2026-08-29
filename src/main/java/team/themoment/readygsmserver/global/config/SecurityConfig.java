@@ -25,6 +25,8 @@ public class SecurityConfig {
             "/api/v1/activity/*",
             "/api/v1/utility/user/role",
             "/api/test-sse",
+            "/api/chat",
+            "/api/chat/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs",
