@@ -56,6 +56,10 @@ kakao:
     client-id: ${KAKAO_CLIENT_ID}
     client-secret: ${KAKAO_CLIENT_SECRET}
 
+chat:
+  # mock | openai — OpenAI 키가 없어도 mock으로 전체 파이프라인이 동작한다
+  client: ${CHAT_CLIENT:mock}
+
 cors:
   allowed-origins:
     - "http://localhost:3000"

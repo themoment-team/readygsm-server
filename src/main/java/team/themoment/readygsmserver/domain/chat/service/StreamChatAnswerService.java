@@ -6,21 +6,28 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import team.themoment.readygsmserver.domain.chat.client.ChatCompletionClient;
+import team.themoment.readygsmserver.domain.chat.client.StreamHandler;
+import team.themoment.readygsmserver.domain.chat.client.StreamSubscription;
 import team.themoment.readygsmserver.domain.chat.dto.request.ChatAskReqDto;
 import team.themoment.readygsmserver.domain.chat.dto.response.ChatDoneResDto;
+import team.themoment.readygsmserver.domain.chat.dto.response.ChatErrorResDto;
+import team.themoment.readygsmserver.domain.chat.entity.ChatMessage;
 import team.themoment.readygsmserver.domain.chat.repository.ConversationRepository;
 import team.themoment.sdk.exception.ExpectedException;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 질문을 받아 답변을 SSE로 흘려보낸다.
  *
- * <p>아직 AI를 붙이지 않은 단계라 고정 문장을 토큰 단위로 내보낸다.
- * 응답 계약(토큰 {@code data:} → {@code event: done})은 최종 형태와 동일하므로
- * 이 시점부터 프론트가 붙을 수 있다.
+ * <p>AI 응답은 도착하는 즉시 재전송한다. 어디에서도 모았다가 한 번에 보내지 않는다.
  */
 @Slf4j
 @Service
@@ -28,66 +35,133 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StreamChatAnswerService {
 
     private static final long EMITTER_TIMEOUT_MILLIS = 180_000L;
-    private static final long TOKEN_INTERVAL_MILLIS = 40L;
-    private static final int TOKEN_LENGTH = 3;
-    private static final String FINISH_REASON_STOP = "stop";
+    private static final long HEARTBEAT_INTERVAL_SECONDS = 15L;
+    private static final String ERROR_REASON_UPSTREAM_INTERRUPTED = "upstream_interrupted";
 
-    private static final String PLACEHOLDER_ANSWER =
-            "원서 접수 시에는 지원서와 자기소개서를 준비해 주세요. "
-                    + "제출 서류는 접수 기간 내에 온라인으로 업로드하시면 됩니다.";
+    /** 프롬프트 조립은 다음 단계에서 붙인다. */
+    private static final String PLACEHOLDER_SYSTEM_PROMPT = "";
 
     private final ConversationRepository conversationRepository;
+    private final ChatCompletionClient chatCompletionClient;
 
-    @Qualifier("chatStreamExecutor")
-    private final Executor chatStreamExecutor;
+    @Qualifier("chatHeartbeatScheduler")
+    private final ScheduledExecutorService chatHeartbeatScheduler;
 
     public SseEmitter execute(String sessionId, ChatAskReqDto req) {
-        validateSession(sessionId);
+        if (!conversationRepository.exists(sessionId)) {
+            throw new ExpectedException("만료되었거나 존재하지 않는 채팅 세션입니다.", HttpStatus.NOT_FOUND);
+        }
 
         SseEmitter emitter = new SseEmitter(EMITTER_TIMEOUT_MILLIS);
-        AtomicBoolean cancelled = new AtomicBoolean(false);
+        ChatStream stream = new ChatStream(sessionId, emitter);
 
-        emitter.onCompletion(() -> cancelled.set(true));
+        emitter.onCompletion(stream::release);
         emitter.onTimeout(() -> {
-            cancelled.set(true);
             log.info("[CHAT] 응답 스트림 타임아웃 sessionId={}", sessionId);
+            stream.release();
         });
         emitter.onError(e -> {
-            cancelled.set(true);
-            log.info("[CHAT] 응답 스트림 오류 sessionId={}", sessionId, e);
+            log.info("[CHAT] 응답 스트림 오류 sessionId={}", sessionId);
+            stream.release();
         });
 
-        chatStreamExecutor.execute(() -> stream(emitter, cancelled, sessionId));
+        stream.start(List.of(ChatMessage.user(req.message())));
 
         return emitter;
     }
 
-    private void validateSession(String sessionId) {
-        if (!conversationRepository.exists(sessionId)) {
-            throw new ExpectedException("만료되었거나 존재하지 않는 채팅 세션입니다.", HttpStatus.NOT_FOUND);
-        }
-    }
+    /**
+     * emitter 하나에 대응하는 스트림 상태.
+     *
+     * <p>토큰 전송은 스트림 스레드에서, heartbeat는 스케줄러 스레드에서 일어나므로
+     * 모든 쓰기를 하나의 락으로 직렬화한다.
+     */
+    private final class ChatStream implements StreamHandler {
 
-    private void stream(SseEmitter emitter, AtomicBoolean cancelled, String sessionId) {
-        try {
-            for (int index = 0; index < PLACEHOLDER_ANSWER.length(); index += TOKEN_LENGTH) {
-                if (cancelled.get()) {
-                    log.info("[CHAT] 클라이언트 연결이 끊겨 응답 스트림을 취소합니다 sessionId={}", sessionId);
-                    return;
-                }
-                int end = Math.min(index + TOKEN_LENGTH, PLACEHOLDER_ANSWER.length());
-                emitter.send(SseEmitter.event().data(PLACEHOLDER_ANSWER.substring(index, end)));
-                Thread.sleep(TOKEN_INTERVAL_MILLIS);
+        private final String sessionId;
+        private final SseEmitter emitter;
+        private final Object sendLock = new Object();
+        private final AtomicBoolean finished = new AtomicBoolean(false);
+        private final AtomicReference<StreamSubscription> subscription = new AtomicReference<>();
+        private final AtomicReference<ScheduledFuture<?>> heartbeat = new AtomicReference<>();
+
+        private ChatStream(String sessionId, SseEmitter emitter) {
+            this.sessionId = sessionId;
+            this.emitter = emitter;
+        }
+
+        private void start(List<ChatMessage> messages) {
+            heartbeat.set(chatHeartbeatScheduler.scheduleAtFixedRate(
+                    this::sendHeartbeat,
+                    HEARTBEAT_INTERVAL_SECONDS,
+                    HEARTBEAT_INTERVAL_SECONDS,
+                    TimeUnit.SECONDS
+            ));
+            StreamSubscription started = chatCompletionClient.stream(PLACEHOLDER_SYSTEM_PROMPT, messages, this);
+            if (finished.get()) {
+                started.cancel();
+            } else {
+                subscription.set(started);
             }
-            emitter.send(SseEmitter.event()
-                    .name("done")
-                    .data(new ChatDoneResDto(FINISH_REASON_STOP)));
+        }
+
+        @Override
+        public void onToken(String token) {
+            send(SseEmitter.event().data(token));
+        }
+
+        @Override
+        public void onComplete(String finishReason) {
+            if (!finished.compareAndSet(false, true)) {
+                return;
+            }
+            send(SseEmitter.event().name("done").data(new ChatDoneResDto(finishReason)));
+            stopHeartbeat();
             emitter.complete();
-        } catch (IOException e) {
-            log.info("[CHAT] 응답 전송 실패, 클라이언트 연결이 끊긴 것으로 보입니다 sessionId={}", sessionId);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            emitter.completeWithError(e);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            if (!finished.compareAndSet(false, true)) {
+                return;
+            }
+            log.warn("[CHAT] 응답 생성 실패 sessionId={}", sessionId, e);
+            send(SseEmitter.event().name("error").data(new ChatErrorResDto(ERROR_REASON_UPSTREAM_INTERRUPTED)));
+            stopHeartbeat();
+            emitter.complete();
+        }
+
+        private void sendHeartbeat() {
+            send(SseEmitter.event().comment("ping"));
+        }
+
+        private void send(SseEmitter.SseEventBuilder event) {
+            synchronized (sendLock) {
+                try {
+                    emitter.send(event);
+                } catch (IOException | IllegalStateException e) {
+                    log.debug("[CHAT] 전송 실패, 클라이언트 연결이 끊긴 것으로 보입니다 sessionId={}", sessionId);
+                    release();
+                }
+            }
+        }
+
+        /** 연결이 끝났으므로 heartbeat를 멈추고 upstream 구독을 해제한다. */
+        private void release() {
+            boolean wasRunning = finished.compareAndSet(false, true);
+            stopHeartbeat();
+            StreamSubscription current = subscription.getAndSet(null);
+            if (current != null && wasRunning) {
+                log.info("[CHAT] 연결이 종료되어 upstream 요청을 취소합니다 sessionId={}", sessionId);
+                current.cancel();
+            }
+        }
+
+        private void stopHeartbeat() {
+            ScheduledFuture<?> current = heartbeat.getAndSet(null);
+            if (current != null) {
+                current.cancel(false);
+            }
         }
     }
 }
