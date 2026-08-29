@@ -29,6 +29,10 @@ spring:
       flush-mode: immediate
       save-mode: on-set-attribute
 
+  mvc:
+    async:
+      request-timeout: 180000
+
 server:
   port: 8080
   servlet:
@@ -79,6 +83,7 @@ sdk:
       - "/v3/api-docs/**"
       - "/swagger-ui/**"
       - "/api/v1/auth/callback"
+      - "/api/test-sse"
 
   response:
     enabled: true
@@ -88,6 +93,7 @@ sdk:
       - "/swagger-ui/**"
       - "/swagger-ui.html"
       - "/api/v1/application/admin/excel"
+      - "/api/test-sse"
 
   exception:
     enabled: true

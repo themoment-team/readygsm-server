@@ -31,6 +31,22 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
+    /**
+     * SseEmitter 반환 이후의 전송을 담당하는 전용 스레드 풀.
+     * 스트림 하나가 응답이 끝날 때까지 스레드를 점유하므로 큐를 두지 않고 바로 스레드로 넘긴다.
+     */
+    @Bean(name = "chatStreamExecutor")
+    public Executor chatStreamExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(50);
+        executor.setQueueCapacity(0);
+        executor.setThreadNamePrefix("chat-stream-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        executor.initialize();
+        return executor;
+    }
+
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return asyncExceptionHandler;
