@@ -38,11 +38,9 @@ public class StreamChatAnswerService {
     private static final long HEARTBEAT_INTERVAL_SECONDS = 15L;
     private static final String ERROR_REASON_UPSTREAM_INTERRUPTED = "upstream_interrupted";
 
-    /** 프롬프트 조립은 다음 단계에서 붙인다. */
-    private static final String PLACEHOLDER_SYSTEM_PROMPT = "";
-
     private final ConversationRepository conversationRepository;
     private final ChatCompletionClient chatCompletionClient;
+    private final ChatPromptAssembler chatPromptAssembler;
 
     @Qualifier("chatHeartbeatScheduler")
     private final ScheduledExecutorService chatHeartbeatScheduler;
@@ -65,7 +63,11 @@ public class StreamChatAnswerService {
             stream.release();
         });
 
-        stream.start(List.of(ChatMessage.user(req.message())));
+        String systemPrompt = chatPromptAssembler.assembleSystemPrompt(req.message());
+        List<ChatMessage> messages = chatPromptAssembler.assembleMessages(List.of(), req.message());
+        chatPromptAssembler.logAssembled(systemPrompt, messages);
+
+        stream.start(systemPrompt, messages);
 
         return emitter;
     }
@@ -90,14 +92,14 @@ public class StreamChatAnswerService {
             this.emitter = emitter;
         }
 
-        private void start(List<ChatMessage> messages) {
+        private void start(String systemPrompt, List<ChatMessage> messages) {
             heartbeat.set(chatHeartbeatScheduler.scheduleAtFixedRate(
                     this::sendHeartbeat,
                     HEARTBEAT_INTERVAL_SECONDS,
                     HEARTBEAT_INTERVAL_SECONDS,
                     TimeUnit.SECONDS
             ));
-            StreamSubscription started = chatCompletionClient.stream(PLACEHOLDER_SYSTEM_PROMPT, messages, this);
+            StreamSubscription started = chatCompletionClient.stream(systemPrompt, messages, this);
             if (finished.get()) {
                 started.cancel();
             } else {
