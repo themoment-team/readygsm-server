@@ -1,9 +1,6 @@
 package team.themoment.readygsmserver.domain.chat.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,9 +23,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * ({@code -N} 없이 호출하면 curl이 버퍼링해서 확인할 수 없다)
  */
 @Slf4j
+@Hidden
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Chat", description = "FAQ 챗봇 API")
 public class SseTestController {
 
     private static final long EMITTER_TIMEOUT_MILLIS = 180_000L;
@@ -38,13 +35,6 @@ public class SseTestController {
     @Qualifier("chatStreamExecutor")
     private final Executor chatStreamExecutor;
 
-    @Operation(
-            summary = "SSE 스트리밍 검증",
-            description = "1초에 한 글자씩 알파벳을 전송합니다. 스트리밍 파이프라인 동작 확인용입니다."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "스트림 시작")
-    })
     @GetMapping(value = "/api/test-sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> testSse() {
         SseEmitter emitter = new SseEmitter(EMITTER_TIMEOUT_MILLIS);

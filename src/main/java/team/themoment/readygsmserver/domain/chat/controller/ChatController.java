@@ -1,9 +1,12 @@
 package team.themoment.readygsmserver.domain.chat.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +61,22 @@ public class ChatController {
                     """
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "스트림 시작"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "스트림 시작",
+                    content = @Content(
+                            mediaType = MediaType.TEXT_EVENT_STREAM_VALUE,
+                            schema = @Schema(type = "string"),
+                            examples = @ExampleObject(value = """
+                                    data: 원서 접
+
+                                    data: 수 시에
+
+                                    event: done
+                                    data: {"finishReason":"stop"}
+                                    """)
+                    )
+            ),
             @ApiResponse(responseCode = "400", description = "질문이 비었거나 500자를 초과함"),
             @ApiResponse(responseCode = "404", description = "만료되었거나 존재하지 않는 세션")
     })
