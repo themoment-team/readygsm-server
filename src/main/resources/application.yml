@@ -60,6 +60,14 @@ chat:
   # mock | openai — OpenAI 키가 없어도 mock으로 전체 파이프라인이 동작한다
   client: ${CHAT_CLIENT:mock}
 
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  base-url: https://api.openai.com
+  model: gpt-4o-mini
+  # 무제한 금지. FAQ 답변은 3문장 이내라 이 정도면 충분하다
+  max-tokens: 800
+  temperature: 0.2
+
 cors:
   allowed-origins:
     - "http://localhost:3000"
