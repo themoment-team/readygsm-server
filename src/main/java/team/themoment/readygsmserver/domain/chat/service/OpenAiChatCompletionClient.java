@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
@@ -54,6 +55,12 @@ public class OpenAiChatCompletionClient implements ChatCompletionClient {
             WebClient.Builder webClientBuilder,
             @Qualifier("chatStreamExecutor") Executor chatStreamExecutor
     ) {
+        // 키 없이 뜨면 요청마다 조용히 401이 난다. 부팅 시점에 끊는 편이 낫다
+        if (!StringUtils.hasText(openAiProperties.apiKey())) {
+            throw new IllegalStateException(
+                    "chat.client=openai 인데 OPENAI_API_KEY가 비어 있습니다. "
+                            + "mock으로 띄우려면 CHAT_CLIENT=mock을 설정하세요.");
+        }
         this.openAiProperties = openAiProperties;
         this.objectMapper = objectMapper;
         this.webClient = webClientBuilder
