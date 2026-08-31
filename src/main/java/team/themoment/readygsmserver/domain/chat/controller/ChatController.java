@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import team.themoment.readygsmserver.domain.chat.dto.request.ChatAskReqDto;
 import team.themoment.readygsmserver.domain.chat.dto.response.ChatSessionResDto;
+import team.themoment.readygsmserver.domain.chat.service.ChatRateLimiter;
 import team.themoment.readygsmserver.domain.chat.service.CreateChatSessionService;
 import team.themoment.readygsmserver.domain.chat.service.StreamChatAnswerService;
 
@@ -32,16 +34,19 @@ public class ChatController {
 
     private final CreateChatSessionService createChatSessionService;
     private final StreamChatAnswerService streamChatAnswerService;
+    private final ChatRateLimiter chatRateLimiter;
 
     @Operation(
             summary = "채팅 세션 발급",
             description = "채팅창을 열 때 호출합니다. 발급된 sessionId를 이후 질문 요청의 X-Session-Id 헤더에 실어 보냅니다. 30분간 유효합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "발급 성공")
+            @ApiResponse(responseCode = "200", description = "발급 성공"),
+            @ApiResponse(responseCode = "429", description = "요청이 너무 많음")
     })
     @PostMapping("/session")
-    public ChatSessionResDto createSession() {
+    public ChatSessionResDto createSession(HttpServletRequest request) {
+        chatRateLimiter.validateSessionCreation(request.getRemoteAddr());
         return createChatSessionService.execute();
     }
 
@@ -78,14 +83,17 @@ public class ChatController {
                     )
             ),
             @ApiResponse(responseCode = "400", description = "질문이 비었거나 500자를 초과함"),
-            @ApiResponse(responseCode = "404", description = "만료되었거나 존재하지 않는 세션")
+            @ApiResponse(responseCode = "404", description = "만료되었거나 존재하지 않는 세션"),
+            @ApiResponse(responseCode = "429", description = "요청이 너무 많음")
     })
     @PostMapping
     public ResponseEntity<SseEmitter> ask(
             @Parameter(description = "세션 발급 API로 받은 sessionId", required = true)
             @RequestHeader("X-Session-Id") String sessionId,
-            @Valid @RequestBody ChatAskReqDto req
+            @Valid @RequestBody ChatAskReqDto req,
+            HttpServletRequest request
     ) {
+        chatRateLimiter.validateAsk(request.getRemoteAddr());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-cache")
                 .header("X-Accel-Buffering", "no")

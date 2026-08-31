@@ -64,7 +64,7 @@ public class StreamChatAnswerService {
         conversationRepository.append(sessionId, ChatMessage.user(req.message()));
 
         SseEmitter emitter = new SseEmitter(EMITTER_TIMEOUT_MILLIS);
-        ChatStream stream = new ChatStream(sessionId, emitter);
+        ChatStream stream = new ChatStream(sessionId, req.message(), emitter);
 
         emitter.onCompletion(stream::release);
         emitter.onTimeout(() -> {
@@ -90,6 +90,7 @@ public class StreamChatAnswerService {
     private final class ChatStream implements StreamHandler {
 
         private final String sessionId;
+        private final String question;
         private final SseEmitter emitter;
         private final Object sendLock = new Object();
         private final AtomicBoolean finished = new AtomicBoolean(false);
@@ -99,8 +100,9 @@ public class StreamChatAnswerService {
         /** 저장용 누적 버퍼. 전송과는 무관하다. */
         private final StringBuilder answer = new StringBuilder();
 
-        private ChatStream(String sessionId, SseEmitter emitter) {
+        private ChatStream(String sessionId, String question, SseEmitter emitter) {
             this.sessionId = sessionId;
+            this.question = question;
             this.emitter = emitter;
         }
 
@@ -152,7 +154,19 @@ public class StreamChatAnswerService {
             if (answer.isEmpty()) {
                 return;
             }
-            conversationRepository.append(sessionId, ChatMessage.assistant(answer.toString()));
+            String content = answer.toString();
+            logIfUnanswerable(content);
+            conversationRepository.append(sessionId, ChatMessage.assistant(content));
+        }
+
+        /**
+         * 답변하지 못한 질문을 남긴다. FAQ에 무엇을 추가해야 할지 알려주는 지표다.
+         * 1차 버전에서 저장할 가치가 있는 유일한 데이터다.
+         */
+        private void logIfUnanswerable(String content) {
+            if (content.contains(ChatPromptAssembler.UNANSWERABLE_MARKER)) {
+                log.warn("[CHAT] FAQ로 답변하지 못한 질문 question={}", question);
+            }
         }
 
         private void sendHeartbeat() {

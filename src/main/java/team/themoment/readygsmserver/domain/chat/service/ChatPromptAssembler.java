@@ -28,6 +28,12 @@ public class ChatPromptAssembler {
 
     private static final String CONTACT = "교무실(062-949-6800, 08:30~16:30)";
 
+    /**
+     * 답변하지 못했음을 나타내는 문구. 아래 지침의 고정 답변에서 따온 것이므로
+     * 지침 문구를 고치면 이 값도 함께 고쳐야 한다.
+     */
+    public static final String UNANSWERABLE_MARKER = "안내드리기 어려워요";
+
     private static final String INSTRUCTION = """
             [역할 정의]
             너는 광주소프트웨어마이스터고등학교 안내 도우미다.
