@@ -1,4 +1,4 @@
-package team.themoment.readygsmserver.domain.chat.client;
+package team.themoment.readygsmserver.domain.chat.service;
 
 /**
  * 스트림 수신 콜백. 구현체는 이 세 메서드를 같은 스레드에서 순서대로 호출한다.

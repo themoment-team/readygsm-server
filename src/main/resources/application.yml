@@ -87,8 +87,8 @@ sdk:
       - "/v3/api-docs/**"
       - "/swagger-ui/**"
       - "/api/v1/auth/callback"
-      - "/api/test-sse"
-      - "/api/chat"
+      - "/api/v1/chat/test-sse"
+      - "/api/v1/chat"
 
   response:
     enabled: true
@@ -98,8 +98,8 @@ sdk:
       - "/swagger-ui/**"
       - "/swagger-ui.html"
       - "/api/v1/application/admin/excel"
-      - "/api/test-sse"
-      - "/api/chat"
+      - "/api/v1/chat/test-sse"
+      - "/api/v1/chat"
 
   exception:
     enabled: true

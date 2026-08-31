@@ -1,4 +1,4 @@
-package team.themoment.readygsmserver.domain.chat.client;
+package team.themoment.readygsmserver.domain.chat.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

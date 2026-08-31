@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * SSE 파이프라인이 응답을 모으지 않고 즉시 흘려보내는지 확인하기 위한 검증용 엔드포인트다.
  * 비즈니스 로직은 없다.
  *
- * <p>검증: {@code curl -N http://localhost:8080/api/test-sse}
+ * <p>검증: {@code curl -N http://localhost:8080/api/v1/chat/test-sse}
  * ({@code -N} 없이 호출하면 curl이 버퍼링해서 확인할 수 없다)
  */
 @Slf4j
@@ -35,7 +35,7 @@ public class SseTestController {
     @Qualifier("chatStreamExecutor")
     private final Executor chatStreamExecutor;
 
-    @GetMapping(value = "/api/test-sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/api/v1/chat/test-sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> testSse() {
         SseEmitter emitter = new SseEmitter(EMITTER_TIMEOUT_MILLIS);
         AtomicBoolean cancelled = new AtomicBoolean(false);

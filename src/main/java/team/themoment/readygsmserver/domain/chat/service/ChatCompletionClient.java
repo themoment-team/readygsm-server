@@ -1,4 +1,4 @@
-package team.themoment.readygsmserver.domain.chat.client;
+package team.themoment.readygsmserver.domain.chat.service;
 
 import team.themoment.readygsmserver.domain.chat.entity.ChatMessage;
 

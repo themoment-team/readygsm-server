@@ -1,4 +1,4 @@
-package team.themoment.readygsmserver.domain.chat.client;
+package team.themoment.readygsmserver.domain.chat.service;
 
 /**
  * 진행 중인 스트림을 끊기 위한 손잡이.

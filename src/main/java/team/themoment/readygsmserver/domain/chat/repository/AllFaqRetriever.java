@@ -1,6 +1,7 @@
-package team.themoment.readygsmserver.domain.chat.faq;
+package team.themoment.readygsmserver.domain.chat.repository;
 
 import org.springframework.stereotype.Component;
+import team.themoment.readygsmserver.domain.chat.entity.Faq;
 
 import java.util.List;
 

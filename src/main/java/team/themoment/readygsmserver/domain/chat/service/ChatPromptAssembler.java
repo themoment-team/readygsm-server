@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import team.themoment.readygsmserver.domain.chat.entity.ChatMessage;
+import team.themoment.readygsmserver.domain.chat.entity.Faq;
 import team.themoment.readygsmserver.domain.chat.entity.constant.ChatRole;
-import team.themoment.readygsmserver.domain.chat.faq.Faq;
-import team.themoment.readygsmserver.domain.chat.faq.FaqRetriever;
+import team.themoment.readygsmserver.domain.chat.repository.FaqRetriever;
 
 import java.util.ArrayList;
 import java.util.List;

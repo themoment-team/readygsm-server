@@ -1,4 +1,4 @@
-package team.themoment.readygsmserver.domain.chat.faq;
+package team.themoment.readygsmserver.domain.chat.entity;
 
 public record Faq(
         String question,

@@ -26,7 +26,7 @@ import team.themoment.readygsmserver.domain.chat.service.StreamChatAnswerService
 
 @RestController
 @Tag(name = "Chat", description = "FAQ 챗봇 API")
-@RequestMapping("/api/chat")
+@RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
 public class ChatController {
 
