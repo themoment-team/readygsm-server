@@ -91,6 +91,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
+          timeout: 60s
           source: "deploy/compose.prod.yml,deploy/backup-mysql.sh,docker/nginx.conf"
           target: "/home/ec2-user/readygsm-files/"
 
