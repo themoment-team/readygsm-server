@@ -92,6 +92,7 @@ jobs:
           PROD_ECR_IMAGE: ${{ steps.build-image.outputs.image_uri }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           AWS_REGION: ${{ env.AWS_REGION }}
+          APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
           PROD_MYSQL_USERNAME: ${{ secrets.PROD_MYSQL_USERNAME }}
           PROD_MYSQL_PASSWORD: ${{ secrets.PROD_MYSQL_PASSWORD }}
           PROD_MYSQL_ROOT_PASSWORD: ${{ secrets.PROD_MYSQL_ROOT_PASSWORD }}
@@ -119,7 +120,18 @@ jobs:
           echo "$BACKUP_B64" | base64 -d > /home/ec2-user/readygsm/backup-mysql.sh
           chmod +x /home/ec2-user/readygsm/backup-mysql.sh
 
-          (crontab -l 2>/dev/null | grep -v "backup-mysql"; echo "0 3 * * * /home/ec2-user/readygsm/backup-mysql.sh >> /var/log/mysql-backup.log 2>&1") | crontab -
+          (crontab -l 2>/dev/null | grep -v "backup-mysql" || true; \
+           echo "0 3 * * * /home/ec2-user/readygsm/backup-mysql.sh >> /var/log/mysql-backup.log 2>&1") | crontab -
+
+          # HTTPS 인증서가 없으면 최초 1회 발급 (서비스 운영 기간이 끝나면 인프라를
+          # destroy하므로 인증서는 매번 새로 발급받으며, 90일 유효기간 특성상
+          # 별도 갱신 자동화는 두지 않는다)
+          if [ ! -f /etc/letsencrypt/live/$APP_DOMAIN/fullchain.pem ]; then
+            docker run --rm --entrypoint certbot \
+              -v /etc/letsencrypt:/etc/letsencrypt \
+              certbot/dns-route53 certonly --dns-route53 \
+              -d $APP_DOMAIN --register-unsafely-without-email --agree-tos --non-interactive
+          fi
 
           cd /home/ec2-user/readygsm
 

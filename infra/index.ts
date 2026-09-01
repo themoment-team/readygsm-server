@@ -153,6 +153,27 @@ new aws.iam.RolePolicy(`${prefix}-ec2-ecr-policy`, {
     }),
 });
 
+// ── IAM Policy (EC2 → certbot DNS-01 인증서 발급/갱신용 Route53 권한) ──
+new aws.iam.RolePolicy(`${prefix}-ec2-certbot-policy`, {
+    name: `${prefix}-ec2-certbot-policy`,
+    role: ec2Role.id,
+    policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+            {
+                Effect: "Allow",
+                Action: [
+                    "route53:ListHostedZones",
+                    "route53:GetChange",
+                    "route53:ChangeResourceRecordSets",
+                    "route53:ListResourceRecordSets",
+                ],
+                Resource: "*",
+            },
+        ],
+    }),
+});
+
 // ── S3 백업 버킷 ──────────────────────────────────────────
 const backupBucket = new aws.s3.BucketV2(`${prefix}-backup`, {
     bucket: `${prefix}-backup`,
@@ -220,6 +241,10 @@ systemctl start docker
 usermod -aG docker ec2-user
 chmod 666 /var/run/docker.sock
 
+# cron (MySQL 백업 스케줄링용, AL2023 기본 미설치)
+dnf install -y cronie
+systemctl enable --now crond
+
 # Docker Compose v2 CLI 플러그인 설치
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -SL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" \\
@@ -254,7 +279,7 @@ const ec2 = new aws.ec2.Instance(`${prefix}-ec2`, {
         httpTokens: "required", // IMDSv2 강제
     },
     tags: { ...commonTags, Name: `${prefix}-ec2` },
-}, { ignoreChanges: ["ami", "rootBlockDevice"] });
+}, { ignoreChanges: ["ami", "rootBlockDevice", "userData"] });
 
 // ── Elastic IP ────────────────────────────────────────────
 const eip = new aws.ec2.Eip(`${prefix}-eip`, {
