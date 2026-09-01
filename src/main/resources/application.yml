@@ -86,6 +86,8 @@ oauth2:
     - "https://readygsm-client.vercel.app/oauth/callback"
     - "https://ready.hellogsm.kr/oauth/callback"
     - "https://www.ready.hellogsm.kr/oauth/callback"
+    - "https://stage-client-ready.hellogsm.kr/oauth/callback"
+    - "https://stage-admin-ready.hellogsm.kr/oauth/callback"
 
 sdk:
   logging:
