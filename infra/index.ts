@@ -153,6 +153,27 @@ new aws.iam.RolePolicy(`${prefix}-ec2-ecr-policy`, {
     }),
 });
 
+// ── IAM Policy (EC2 → certbot DNS-01 인증서 발급/갱신용 Route53 권한) ──
+new aws.iam.RolePolicy(`${prefix}-ec2-certbot-policy`, {
+    name: `${prefix}-ec2-certbot-policy`,
+    role: ec2Role.id,
+    policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+            {
+                Effect: "Allow",
+                Action: [
+                    "route53:ListHostedZones",
+                    "route53:GetChange",
+                    "route53:ChangeResourceRecordSets",
+                    "route53:ListResourceRecordSets",
+                ],
+                Resource: "*",
+            },
+        ],
+    }),
+});
+
 // ── S3 백업 버킷 ──────────────────────────────────────────
 const backupBucket = new aws.s3.BucketV2(`${prefix}-backup`, {
     bucket: `${prefix}-backup`,
