@@ -64,9 +64,7 @@ jobs:
           pulumi stack select gsmthemoment-gmail-com/prod
           pulumi up --yes \
             --config "readygsm-infra:hostedZoneName=${{ secrets.HOSTED_ZONE_NAME }}" \
-            --config "readygsm-infra:appDomain=${{ secrets.APP_DOMAIN }}" \
-            --config "readygsm-infra:vercelCnameName=${{ secrets.VERCEL_CNAME_NAME }}" \
-            --config "readygsm-infra:vercelCnameTarget=${{ secrets.VERCEL_CNAME_TARGET }}"
+            --config "readygsm-infra:appDomain=${{ secrets.APP_DOMAIN }}"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
@@ -93,7 +91,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          source: "deploy/compose.prod.yml,docker/nginx.conf"
+          source: "deploy/compose.prod.yml,deploy/backup-mysql.sh,docker/nginx.conf"
           target: "/home/ec2-user/readygsm-files/"
 
       - name: Deploy to EC2
@@ -103,7 +101,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           port: 22
-          envs: PROD_ECR_IMAGE,ECR_REGISTRY,AWS_REGION,PROD_MYSQL_USERNAME,PROD_MYSQL_PASSWORD,PROD_MYSQL_ROOT_PASSWORD,PROD_REDIS_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET,DISCORD_ERROR_WEBHOOK_URL
+          envs: PROD_ECR_IMAGE,ECR_REGISTRY,AWS_REGION,PROD_MYSQL_USERNAME,PROD_MYSQL_PASSWORD,PROD_MYSQL_ROOT_PASSWORD,PROD_REDIS_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET,DISCORD_ERROR_WEBHOOK_URL,OPENAI_API_KEY
           script: |
             set -e
 
@@ -111,6 +109,11 @@ jobs:
             cp /home/ec2-user/readygsm-files/deploy/compose.prod.yml /home/ec2-user/readygsm/compose.prod.yml
             mkdir -p /home/ec2-user/readygsm/nginx
             cp /home/ec2-user/readygsm-files/docker/nginx.conf /home/ec2-user/readygsm/nginx/nginx.conf
+            cp /home/ec2-user/readygsm-files/deploy/backup-mysql.sh /home/ec2-user/readygsm/backup-mysql.sh
+            chmod +x /home/ec2-user/readygsm/backup-mysql.sh
+
+            # cron job 등록 (중복 방지)
+            (crontab -l 2>/dev/null | grep -v "backup-mysql"; echo "0 3 * * * /home/ec2-user/readygsm/backup-mysql.sh >> /var/log/mysql-backup.log 2>&1") | crontab -
 
             cd /home/ec2-user/readygsm
 
@@ -130,6 +133,7 @@ jobs:
             KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
             PROD_ECR_IMAGE=$PROD_ECR_IMAGE
             DISCORD_ERROR_WEBHOOK_URL=$DISCORD_ERROR_WEBHOOK_URL
+            OPENAI_API_KEY=$OPENAI_API_KEY
             ENVEOF
 
             # 새 이미지 pull
@@ -157,3 +161,4 @@ jobs:
           KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           DISCORD_ERROR_WEBHOOK_URL: ${{ secrets.DISCORD_ERROR_WEBHOOK_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

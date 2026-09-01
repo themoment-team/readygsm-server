@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 @Transactional
 public class ApplyActivityService {
 
+    private static final int MAX_RESERVE_APPLICANT = 3;
+
     private final ApplicationRepository applicationRepository;
     private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
@@ -45,8 +47,12 @@ public class ApplyActivityService {
         }
 
         long currentMainApplicants = applicationRepository.countByActivity_IdAndIsReserve(activityId, false);
-        boolean hasReserve = applicationRepository.existsByActivity_IdAndIsReserve(activityId, true);
-        boolean isReserve = currentMainApplicants >= activity.getMaxApplicant() || hasReserve;
+        long currentReserveApplicants = applicationRepository.countByActivity_IdAndIsReserve(activityId, true);
+        boolean isReserve = currentMainApplicants >= activity.getMaxApplicant() || currentReserveApplicants > 0;
+
+        if (isReserve && currentReserveApplicants >= MAX_RESERVE_APPLICANT) {
+            throw new ExpectedException("예비인원이 마감되었습니다.", HttpStatus.CONFLICT);
+        }
 
         ApplicationJpaEntity saved = applicationRepository.save(
                 ApplicationJpaEntity.builder()
@@ -63,6 +69,7 @@ public class ApplyActivityService {
                         .build()
         );
 
-        return ApplicationResDto.from(saved);
+        Integer reserveOrder = isReserve ? (int) currentReserveApplicants + 1 : null;
+        return ApplicationResDto.from(saved, reserveOrder);
     }
 }

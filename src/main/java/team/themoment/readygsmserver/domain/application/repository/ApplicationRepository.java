@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,10 +15,13 @@ public interface ApplicationRepository extends JpaRepository<ApplicationJpaEntit
     boolean existsByUser_Id(Long userId);
     long countByActivity_Id(Long activityId);
     long countByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
-    boolean existsByActivity_IdAndIsReserve(Long activityId, boolean isReserve);
     @EntityGraph(attributePaths = {"activity"})
     Optional<ApplicationJpaEntity> findByActivity_IdAndUser_Id(Long activityId, Long userId);
     Optional<ApplicationJpaEntity> findFirstByActivity_IdAndIsReserveTrueOrderByCreatedAtAscIdAsc(Long activityId);
+
+    @Query("SELECT COUNT(a) FROM ApplicationJpaEntity a WHERE a.activity.id = :activityId AND a.isReserve = true " +
+            "AND (a.createdAt < :createdAt OR (a.createdAt = :createdAt AND a.id < :id))")
+    long countReserveApplicantsAheadOf(@Param("activityId") Long activityId, @Param("createdAt") LocalDateTime createdAt, @Param("id") Long id);
 
     @Query("SELECT app.activity.id, COUNT(app) FROM ApplicationJpaEntity app GROUP BY app.activity.id")
     List<Object[]> countApplicantsGroupedByActivity();

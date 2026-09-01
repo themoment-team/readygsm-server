@@ -139,6 +139,42 @@ new aws.iam.RolePolicy(`${prefix}-ec2-ecr-policy`, {
     }),
 });
 
+// ── S3 백업 버킷 ──────────────────────────────────────────
+const backupBucket = new aws.s3.BucketV2(`${prefix}-backup`, {
+    bucket: `${prefix}-backup`,
+    tags: { ...commonTags, Name: `${prefix}-backup` },
+});
+
+new aws.s3.BucketPublicAccessBlock(`${prefix}-backup-public-access-block`, {
+    bucket: backupBucket.id,
+    blockPublicAcls: true,
+    blockPublicPolicy: true,
+    ignorePublicAcls: true,
+    restrictPublicBuckets: true,
+});
+
+new aws.s3.BucketLifecycleConfigurationV2(`${prefix}-backup-lifecycle`, {
+    bucket: backupBucket.id,
+    rules: [{
+        id: "expire-old-backups",
+        status: "Enabled",
+        expiration: { days: 30 },
+    }],
+});
+
+new aws.iam.RolePolicy(`${prefix}-ec2-s3-backup-policy`, {
+    name: `${prefix}-ec2-s3-backup-policy`,
+    role: ec2Role.id,
+    policy: backupBucket.arn.apply(arn => JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [{
+            Effect: "Allow",
+            Action: ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+            Resource: [arn, `${arn}/*`],
+        }],
+    })),
+});
+
 const ec2InstanceProfile = new aws.iam.InstanceProfile(`${prefix}-ec2-profile`, {
     name: `${prefix}-ec2-profile`,
     role: ec2Role.name,
@@ -260,19 +296,8 @@ new aws.route53.Record(`${prefix}-dns`, {
     records: [eip.publicIp],
 });
 
-// ── Route 53 CNAME 레코드 (Vercel 프론트엔드) ────────────────
-// 설정 방법: pulumi config set --secret readygsm-infra:vercelCnameName <name>
-//           pulumi config set --secret readygsm-infra:vercelCnameTarget <vercel-dns-value>
-const vercelCnameName   = config.require("vercelCnameName");
-const vercelCnameTarget = config.require("vercelCnameTarget");
-
-new aws.route53.Record(`${prefix}-vercel-cname`, {
-    zoneId: hostedZone.then((hz) => hz.zoneId),
-    name: pulumi.interpolate`${vercelCnameName}.${hostedZoneName}`,
-    type: "CNAME",
-    ttl: dnsTtl,
-    records: [vercelCnameTarget],
-});
+// ── Vercel 프론트엔드(client/admin) CNAME 레코드는 Route53에 수동 등록되어
+// 상시 유지되므로 Pulumi가 관리하지 않는다.
 
 // ── Outputs ───────────────────────────────────────────────
 export const vpcId = vpc.id;
@@ -281,3 +306,4 @@ export const ec2PublicIp = eip.publicIp;
 export const ecrRepositoryUrl = ecrRepo.repositoryUrl;
 export const ecrRepositoryName = ecrRepo.name;
 export const appDomain = appDomainName;
+export const backupBucketName = backupBucket.id;

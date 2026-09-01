@@ -29,6 +29,10 @@ spring:
       flush-mode: immediate
       save-mode: on-set-attribute
 
+  mvc:
+    async:
+      request-timeout: 180000
+
 server:
   port: 8080
   servlet:
@@ -39,8 +43,6 @@ server:
 springdoc:
   swagger-ui:
     disable-swagger-default-url: true
-    config-url: /ready-gsm/v3/api-docs/swagger-config
-    url: /ready-gsm/v3/api-docs
 
 google:
   oauth:
@@ -52,6 +54,18 @@ kakao:
     client-id: ${KAKAO_CLIENT_ID}
     client-secret: ${KAKAO_CLIENT_SECRET}
 
+chat:
+  # mock | openai — OpenAI 키가 없어도 mock으로 전체 파이프라인이 동작한다
+  client: ${CHAT_CLIENT:mock}
+
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  base-url: https://api.openai.com
+  model: gpt-4o-mini
+  # 무제한 금지. FAQ 답변은 3문장 이내라 이 정도면 충분하다
+  max-tokens: 800
+  temperature: 0.2
+
 cors:
   allowed-origins:
     - "http://localhost:3000"
@@ -60,6 +74,7 @@ cors:
     - "https://readygsm-client.vercel.app"
     - "https://ready.hellogsm.kr"
     - "https://www.ready.hellogsm.kr"
+    - "https://stage-client-ready.hellogsm.kr"
 
 oauth2:
   success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
@@ -71,6 +86,8 @@ oauth2:
     - "https://readygsm-client.vercel.app/oauth/callback"
     - "https://ready.hellogsm.kr/oauth/callback"
     - "https://www.ready.hellogsm.kr/oauth/callback"
+    - "https://stage-client-ready.hellogsm.kr/oauth/callback"
+    - "https://stage-admin-ready.hellogsm.kr/oauth/callback"
 
 sdk:
   logging:
@@ -79,6 +96,8 @@ sdk:
       - "/v3/api-docs/**"
       - "/swagger-ui/**"
       - "/api/v1/auth/callback"
+      - "/api/v1/chat/test-sse"
+      - "/api/v1/chat"
 
   response:
     enabled: true
@@ -88,6 +107,8 @@ sdk:
       - "/swagger-ui/**"
       - "/swagger-ui.html"
       - "/api/v1/application/admin/excel"
+      - "/api/v1/chat/test-sse"
+      - "/api/v1/chat"
 
   exception:
     enabled: true
