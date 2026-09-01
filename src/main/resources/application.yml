@@ -87,6 +87,7 @@ oauth2:
     - "https://ready.hellogsm.kr/oauth/callback"
     - "https://www.ready.hellogsm.kr/oauth/callback"
     - "https://stage-client-ready.hellogsm.kr/oauth/callback"
+    - "https://stage-admin-ready.hellogsm.kr/oauth/callback"
 
 sdk:
   logging:
