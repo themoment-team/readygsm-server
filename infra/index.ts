@@ -220,6 +220,10 @@ systemctl start docker
 usermod -aG docker ec2-user
 chmod 666 /var/run/docker.sock
 
+# cron (MySQL 백업 스케줄링용, AL2023 기본 미설치)
+dnf install -y cronie
+systemctl enable --now crond
+
 # Docker Compose v2 CLI 플러그인 설치
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -SL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" \\
@@ -254,7 +258,7 @@ const ec2 = new aws.ec2.Instance(`${prefix}-ec2`, {
         httpTokens: "required", // IMDSv2 강제
     },
     tags: { ...commonTags, Name: `${prefix}-ec2` },
-}, { ignoreChanges: ["ami", "rootBlockDevice"] });
+}, { ignoreChanges: ["ami", "rootBlockDevice", "userData"] });
 
 // ── Elastic IP ────────────────────────────────────────────
 const eip = new aws.ec2.Eip(`${prefix}-eip`, {
