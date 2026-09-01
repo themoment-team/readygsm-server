@@ -124,6 +124,11 @@ const ec2Role = new aws.iam.Role(`${prefix}-ec2-role`, {
     tags: { ...commonTags, Name: `${prefix}-ec2-role` },
 });
 
+new aws.iam.RolePolicyAttachment(`${prefix}-ec2-ssm-core`, {
+    role: ec2Role.name,
+    policyArn: "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+});
+
 new aws.iam.RolePolicy(`${prefix}-ec2-ecr-policy`, {
     name: `${prefix}-ec2-ecr-policy`,
     role: ec2Role.id,
