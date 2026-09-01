@@ -90,7 +90,7 @@ jobs:
           host: ${{ secrets.PROD_SERVER_HOST }}
           username: ec2-user
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          port: 22
+          port: 2222
           timeout: 60s
           source: "deploy/compose.prod.yml,deploy/backup-mysql.sh,docker/nginx.conf"
           target: "/home/ec2-user/readygsm-files/"
@@ -101,7 +101,7 @@ jobs:
           host: ${{ secrets.PROD_SERVER_HOST }}
           username: ec2-user
           key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          port: 22
+          port: 2222
           envs: PROD_ECR_IMAGE,ECR_REGISTRY,AWS_REGION,PROD_MYSQL_USERNAME,PROD_MYSQL_PASSWORD,PROD_MYSQL_ROOT_PASSWORD,PROD_REDIS_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET,DISCORD_ERROR_WEBHOOK_URL,OPENAI_API_KEY
           script: |
             set -e
