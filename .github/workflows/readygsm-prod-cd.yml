@@ -59,12 +59,14 @@ jobs:
         run: npm ci
 
       - name: Deploy infrastructure
+        id: infra
         working-directory: infra
         run: |
           pulumi stack select gsmthemoment-gmail-com/prod
           pulumi up --yes \
             --config "readygsm-infra:hostedZoneName=${{ secrets.HOSTED_ZONE_NAME }}" \
             --config "readygsm-infra:appDomain=${{ secrets.APP_DOMAIN }}"
+          echo "instance_id=$(pulumi stack output ec2InstanceId)" >> "$GITHUB_OUTPUT"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
@@ -84,72 +86,9 @@ jobs:
           docker push "${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:latest"
           echo "image_uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
 
-      - name: Copy config files to EC2
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ secrets.PROD_SERVER_HOST }}
-          username: ec2-user
-          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          port: 22
-          timeout: 60s
-          source: "deploy/compose.prod.yml,deploy/backup-mysql.sh,docker/nginx.conf"
-          target: "/home/ec2-user/readygsm-files/"
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.PROD_SERVER_HOST }}
-          username: ec2-user
-          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
-          port: 22
-          envs: PROD_ECR_IMAGE,ECR_REGISTRY,AWS_REGION,PROD_MYSQL_USERNAME,PROD_MYSQL_PASSWORD,PROD_MYSQL_ROOT_PASSWORD,PROD_REDIS_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,KAKAO_CLIENT_ID,KAKAO_CLIENT_SECRET,DISCORD_ERROR_WEBHOOK_URL,OPENAI_API_KEY
-          script: |
-            set -e
-
-            # 전송된 파일을 올바른 위치로 이동
-            cp /home/ec2-user/readygsm-files/deploy/compose.prod.yml /home/ec2-user/readygsm/compose.prod.yml
-            mkdir -p /home/ec2-user/readygsm/nginx
-            cp /home/ec2-user/readygsm-files/docker/nginx.conf /home/ec2-user/readygsm/nginx/nginx.conf
-            cp /home/ec2-user/readygsm-files/deploy/backup-mysql.sh /home/ec2-user/readygsm/backup-mysql.sh
-            chmod +x /home/ec2-user/readygsm/backup-mysql.sh
-
-            # cron job 등록 (중복 방지)
-            (crontab -l 2>/dev/null | grep -v "backup-mysql"; echo "0 3 * * * /home/ec2-user/readygsm/backup-mysql.sh >> /var/log/mysql-backup.log 2>&1") | crontab -
-
-            cd /home/ec2-user/readygsm
-
-            # ECR 로그인 (EC2 IAM 인스턴스 프로파일 사용)
-            aws ecr get-login-password --region $AWS_REGION \
-              | docker login --username AWS --password-stdin $ECR_REGISTRY
-
-            # .env 파일 갱신
-            cat > .env << ENVEOF
-            PROD_MYSQL_USERNAME=$PROD_MYSQL_USERNAME
-            PROD_MYSQL_PASSWORD=$PROD_MYSQL_PASSWORD
-            PROD_MYSQL_ROOT_PASSWORD=$PROD_MYSQL_ROOT_PASSWORD
-            PROD_REDIS_PASSWORD=$PROD_REDIS_PASSWORD
-            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-            KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
-            KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
-            PROD_ECR_IMAGE=$PROD_ECR_IMAGE
-            DISCORD_ERROR_WEBHOOK_URL=$DISCORD_ERROR_WEBHOOK_URL
-            OPENAI_API_KEY=$OPENAI_API_KEY
-            ENVEOF
-
-            # 새 이미지 pull
-            docker pull $PROD_ECR_IMAGE
-
-            # 최초 배포: 모든 서비스 시작 / 재배포: app만 재시작
-            if docker compose -f compose.prod.yml --env-file .env ps --quiet mysql 2>/dev/null | grep -q .; then
-              docker compose -f compose.prod.yml --env-file .env up -d --no-deps app
-            else
-              docker compose -f compose.prod.yml --env-file .env up -d
-            fi
-
-            # 미사용 이미지 정리
-            docker image prune -f
+      - name: Deploy to EC2 via SSM
         env:
+          INSTANCE_ID: ${{ steps.infra.outputs.instance_id }}
           PROD_ECR_IMAGE: ${{ steps.build-image.outputs.image_uri }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           AWS_REGION: ${{ env.AWS_REGION }}
@@ -163,3 +102,82 @@ jobs:
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           DISCORD_ERROR_WEBHOOK_URL: ${{ secrets.DISCORD_ERROR_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -e
+
+          # SSH(22/2222)가 일부 GitHub Actions 러너 네트워크에서 아웃바운드 필터링되는
+          # 문제(2026-09-01)로 인해 HTTPS 기반 AWS SSM으로 배포 방식 전환
+          COMPOSE_B64=$(base64 -w0 deploy/compose.prod.yml)
+          NGINX_B64=$(base64 -w0 docker/nginx.conf)
+          BACKUP_B64=$(base64 -w0 deploy/backup-mysql.sh)
+
+          cat > /tmp/remote_script.sh << REMOTE_EOF
+          set -e
+          mkdir -p /home/ec2-user/readygsm/nginx
+          echo "$COMPOSE_B64" | base64 -d > /home/ec2-user/readygsm/compose.prod.yml
+          echo "$NGINX_B64" | base64 -d > /home/ec2-user/readygsm/nginx/nginx.conf
+          echo "$BACKUP_B64" | base64 -d > /home/ec2-user/readygsm/backup-mysql.sh
+          chmod +x /home/ec2-user/readygsm/backup-mysql.sh
+
+          (crontab -l 2>/dev/null | grep -v "backup-mysql"; echo "0 3 * * * /home/ec2-user/readygsm/backup-mysql.sh >> /var/log/mysql-backup.log 2>&1") | crontab -
+
+          cd /home/ec2-user/readygsm
+
+          aws ecr get-login-password --region $AWS_REGION \
+            | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+          cat > .env << ENVEOF
+          PROD_MYSQL_USERNAME=$PROD_MYSQL_USERNAME
+          PROD_MYSQL_PASSWORD=$PROD_MYSQL_PASSWORD
+          PROD_MYSQL_ROOT_PASSWORD=$PROD_MYSQL_ROOT_PASSWORD
+          PROD_REDIS_PASSWORD=$PROD_REDIS_PASSWORD
+          GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+          GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+          KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
+          KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
+          PROD_ECR_IMAGE=$PROD_ECR_IMAGE
+          DISCORD_ERROR_WEBHOOK_URL=$DISCORD_ERROR_WEBHOOK_URL
+          OPENAI_API_KEY=$OPENAI_API_KEY
+          ENVEOF
+
+          docker pull $PROD_ECR_IMAGE
+
+          if docker compose -f compose.prod.yml --env-file .env ps --quiet mysql 2>/dev/null | grep -q .; then
+            docker compose -f compose.prod.yml --env-file .env up -d --no-deps app
+          else
+            docker compose -f compose.prod.yml --env-file .env up -d
+          fi
+
+          docker image prune -f
+          REMOTE_EOF
+
+          SCRIPT_B64=$(base64 -w0 /tmp/remote_script.sh)
+          jq -n --arg cmd "echo $SCRIPT_B64 | base64 -d | bash" '{commands: [$cmd]}' > /tmp/ssm-params.json
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters file:///tmp/ssm-params.json \
+            --comment "readygsm prod deploy ${{ github.sha }}" \
+            --output text --query "Command.CommandId")
+          echo "SSM command id: $COMMAND_ID"
+
+          STATUS="Pending"
+          for i in $(seq 1 60); do
+            STATUS=$(aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" --query "Status" --output text 2>/dev/null || echo "Pending")
+            echo "status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              break
+            fi
+            sleep 5
+          done
+
+          echo "=== stdout ==="
+          aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" --query "StandardOutputContent" --output text
+          echo "=== stderr ==="
+          aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" --query "StandardErrorContent" --output text
+
+          if [[ "$STATUS" != "Success" ]]; then
+            echo "SSM command failed with status: $STATUS"
+            exit 1
+          fi

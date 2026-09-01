@@ -72,6 +72,15 @@ const sg = new aws.ec2.SecurityGroup(`${prefix}-sg`, {
             // cidrBlocks: ["YOUR_IP/32"],
         },
         {
+            // GitHub Actions 호스팅 러너의 아웃바운드가 22번 포트만 필터링하는 네트워크가 있어
+            // CD 파이프라인이 22번으로 접속하지 못하는 문제 발견 (2026-09-01). CI는 이 대체 포트로 접속.
+            description: "SSH-alt (bypass port22 outbound filtering on some CI networks)",
+            protocol: "tcp",
+            fromPort: 2222,
+            toPort: 2222,
+            cidrBlocks: ["0.0.0.0/0"],
+        },
+        {
             description: "HTTP",
             protocol: "tcp",
             fromPort: 80,
@@ -113,6 +122,11 @@ const ec2Role = new aws.iam.Role(`${prefix}-ec2-role`, {
         ],
     }),
     tags: { ...commonTags, Name: `${prefix}-ec2-role` },
+});
+
+new aws.iam.RolePolicyAttachment(`${prefix}-ec2-ssm-core`, {
+    role: ec2Role.name,
+    policyArn: "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
 });
 
 new aws.iam.RolePolicy(`${prefix}-ec2-ecr-policy`, {
