@@ -75,6 +75,7 @@ cors:
     - "https://ready.hellogsm.kr"
     - "https://www.ready.hellogsm.kr"
     - "https://stage-client-ready.hellogsm.kr"
+    - "https://stage-admin-ready.hellogsm.kr"
 
 oauth2:
   success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
