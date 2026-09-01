@@ -15,10 +15,10 @@ public class CreateChatSessionService {
 
     private final ConversationRepository conversationRepository;
 
-    public ChatSessionResDto execute() {
+    public ChatSessionResDto execute(Long userId) {
         String sessionId = UUID.randomUUID().toString();
-        conversationRepository.create(sessionId);
-        log.debug("[CHAT] 채팅 세션 생성 sessionId={}", sessionId);
+        conversationRepository.create(sessionId, userId);
+        log.debug("[CHAT] 채팅 세션 생성 userId={} sessionId={}", userId, sessionId);
         return new ChatSessionResDto(sessionId);
     }
 }

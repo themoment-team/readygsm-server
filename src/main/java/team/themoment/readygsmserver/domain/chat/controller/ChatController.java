@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +24,7 @@ import team.themoment.readygsmserver.domain.chat.dto.response.ChatSessionResDto;
 import team.themoment.readygsmserver.domain.chat.service.ChatRateLimiter;
 import team.themoment.readygsmserver.domain.chat.service.CreateChatSessionService;
 import team.themoment.readygsmserver.domain.chat.service.StreamChatAnswerService;
+import team.themoment.readygsmserver.global.security.annotation.AuthRequest;
 
 @RestController
 @Tag(name = "Chat", description = "FAQ 챗봇 API")
@@ -38,16 +38,23 @@ public class ChatController {
 
     @Operation(
             summary = "채팅 세션 발급",
-            description = "채팅창을 열 때 호출합니다. 발급된 sessionId를 이후 질문 요청의 X-Session-Id 헤더에 실어 보냅니다. 30분간 유효합니다."
+            description = """
+                    채팅창을 열 때 호출합니다. 로그인이 필요합니다.
+
+                    발급된 sessionId를 이후 질문 요청의 X-Session-Id 헤더에 실어 보냅니다. 30분간 유효하며 질문할 때마다 갱신됩니다.
+
+                    대화 이력을 돌려주는 API는 없습니다. 새로고침 등으로 화면이 비면 이전 sessionId를 버리고 새로 발급받으세요.
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "발급 성공"),
+            @ApiResponse(responseCode = "403", description = "로그인이 필요함"),
             @ApiResponse(responseCode = "429", description = "요청이 너무 많음")
     })
     @PostMapping("/session")
-    public ChatSessionResDto createSession(HttpServletRequest request) {
-        chatRateLimiter.validateSessionCreation(request.getRemoteAddr());
-        return createChatSessionService.execute();
+    public ChatSessionResDto createSession(@AuthRequest Long userId) {
+        chatRateLimiter.validateSessionCreation(userId);
+        return createChatSessionService.execute(userId);
     }
 
     /**
@@ -83,21 +90,22 @@ public class ChatController {
                     )
             ),
             @ApiResponse(responseCode = "400", description = "질문이 비었거나 500자를 초과함"),
-            @ApiResponse(responseCode = "404", description = "만료되었거나 존재하지 않는 세션"),
+            @ApiResponse(responseCode = "403", description = "로그인이 필요함"),
+            @ApiResponse(responseCode = "404", description = "만료되었거나, 존재하지 않거나, 본인의 것이 아닌 세션"),
             @ApiResponse(responseCode = "429", description = "요청이 너무 많음")
     })
     @PostMapping
     public ResponseEntity<SseEmitter> ask(
+            @AuthRequest Long userId,
             @Parameter(description = "세션 발급 API로 받은 sessionId", required = true)
             @RequestHeader("X-Session-Id") String sessionId,
-            @Valid @RequestBody ChatAskReqDto req,
-            HttpServletRequest request
+            @Valid @RequestBody ChatAskReqDto req
     ) {
-        chatRateLimiter.validateAsk(request.getRemoteAddr());
+        chatRateLimiter.validateAsk(userId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "no-cache")
                 .header("X-Accel-Buffering", "no")
                 .contentType(MediaType.TEXT_EVENT_STREAM)
-                .body(streamChatAnswerService.execute(sessionId, req));
+                .body(streamChatAnswerService.execute(userId, sessionId, req));
     }
 }
