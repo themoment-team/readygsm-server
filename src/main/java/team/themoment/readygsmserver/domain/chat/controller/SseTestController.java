@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>검증: {@code curl -N http://localhost:8080/api/v1/chat/test-sse}
  * ({@code -N} 없이 호출하면 curl이 버퍼링해서 확인할 수 없다)
+ *
+ * <p>프론트 SSE 연동이 끝나면 삭제한다. 현재 prod 프로파일을 활성화하는 곳이 없어
+ * {@code @Profile("!prod")}만으로는 운영에서 빠지지 않는다.
  */
 @Slf4j
 @Hidden
+@Profile("!prod")
 @RestController
 @RequiredArgsConstructor
 public class SseTestController {
