@@ -35,7 +35,7 @@ services:
       - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
       - KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
       - DISCORD_ERROR_WEBHOOK_URL=${DISCORD_ERROR_WEBHOOK_URL}
-      - CHAT_CLIENT=openai
+      - CHAT_CLIENT=mock
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       mysql:
