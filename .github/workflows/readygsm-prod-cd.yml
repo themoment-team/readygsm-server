@@ -86,13 +86,9 @@ jobs:
           docker push "${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:latest"
           echo "image_uri=${IMAGE_URI}" >> $GITHUB_OUTPUT
 
-      - name: Deploy to EC2 via SSM
+      - name: Sync secrets to SSM Parameter Store
         env:
-          INSTANCE_ID: ${{ steps.infra.outputs.instance_id }}
-          PROD_ECR_IMAGE: ${{ steps.build-image.outputs.image_uri }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           AWS_REGION: ${{ env.AWS_REGION }}
-          APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
           PROD_MYSQL_USERNAME: ${{ secrets.PROD_MYSQL_USERNAME }}
           PROD_MYSQL_PASSWORD: ${{ secrets.PROD_MYSQL_PASSWORD }}
           PROD_MYSQL_ROOT_PASSWORD: ${{ secrets.PROD_MYSQL_ROOT_PASSWORD }}
@@ -103,6 +99,29 @@ jobs:
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           DISCORD_ERROR_WEBHOOK_URL: ${{ secrets.DISCORD_ERROR_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -e
+          # SSM RunCommand 파라미터(명령어 본문)는 CloudTrail/SSM 콘솔에 평문으로 남으므로
+          # 시크릿은 명령어에 직접 담지 않고 SecureString 파라미터로만 전달한다.
+          put() { aws ssm put-parameter --name "/readygsm-prod/$1" --value "$2" --type SecureString --overwrite --region "$AWS_REGION" > /dev/null; }
+          put mysql-username "$PROD_MYSQL_USERNAME"
+          put mysql-password "$PROD_MYSQL_PASSWORD"
+          put mysql-root-password "$PROD_MYSQL_ROOT_PASSWORD"
+          put redis-password "$PROD_REDIS_PASSWORD"
+          put google-client-id "$GOOGLE_CLIENT_ID"
+          put google-client-secret "$GOOGLE_CLIENT_SECRET"
+          put kakao-client-id "$KAKAO_CLIENT_ID"
+          put kakao-client-secret "$KAKAO_CLIENT_SECRET"
+          put discord-webhook-url "$DISCORD_ERROR_WEBHOOK_URL"
+          put openai-api-key "$OPENAI_API_KEY"
+
+      - name: Deploy to EC2 via SSM
+        env:
+          INSTANCE_ID: ${{ steps.infra.outputs.instance_id }}
+          PROD_ECR_IMAGE: ${{ steps.build-image.outputs.image_uri }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
         run: |
           set -e
 
@@ -138,18 +157,20 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION \
             | docker login --username AWS --password-stdin $ECR_REGISTRY
 
+          get_param() { aws ssm get-parameter --name "/readygsm-prod/\$1" --with-decryption --region $AWS_REGION --query Parameter.Value --output text; }
+
           cat > .env << ENVEOF
-          PROD_MYSQL_USERNAME=$PROD_MYSQL_USERNAME
-          PROD_MYSQL_PASSWORD=$PROD_MYSQL_PASSWORD
-          PROD_MYSQL_ROOT_PASSWORD=$PROD_MYSQL_ROOT_PASSWORD
-          PROD_REDIS_PASSWORD=$PROD_REDIS_PASSWORD
-          GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
-          GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-          KAKAO_CLIENT_ID=$KAKAO_CLIENT_ID
-          KAKAO_CLIENT_SECRET=$KAKAO_CLIENT_SECRET
+          PROD_MYSQL_USERNAME=\$(get_param mysql-username)
+          PROD_MYSQL_PASSWORD=\$(get_param mysql-password)
+          PROD_MYSQL_ROOT_PASSWORD=\$(get_param mysql-root-password)
+          PROD_REDIS_PASSWORD=\$(get_param redis-password)
+          GOOGLE_CLIENT_ID=\$(get_param google-client-id)
+          GOOGLE_CLIENT_SECRET=\$(get_param google-client-secret)
+          KAKAO_CLIENT_ID=\$(get_param kakao-client-id)
+          KAKAO_CLIENT_SECRET=\$(get_param kakao-client-secret)
           PROD_ECR_IMAGE=$PROD_ECR_IMAGE
-          DISCORD_ERROR_WEBHOOK_URL=$DISCORD_ERROR_WEBHOOK_URL
-          OPENAI_API_KEY=$OPENAI_API_KEY
+          DISCORD_ERROR_WEBHOOK_URL=\$(get_param discord-webhook-url)
+          OPENAI_API_KEY=\$(get_param openai-api-key)
           ENVEOF
 
           docker pull $PROD_ECR_IMAGE
