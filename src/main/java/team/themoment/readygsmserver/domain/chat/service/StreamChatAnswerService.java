@@ -10,6 +10,7 @@ import team.themoment.readygsmserver.domain.chat.dto.request.ChatAskReqDto;
 import team.themoment.readygsmserver.domain.chat.dto.response.ChatDoneResDto;
 import team.themoment.readygsmserver.domain.chat.dto.response.ChatErrorResDto;
 import team.themoment.readygsmserver.domain.chat.entity.ChatMessage;
+import team.themoment.readygsmserver.domain.chat.entity.Conversation;
 import team.themoment.readygsmserver.domain.chat.repository.ConversationRepository;
 import team.themoment.sdk.exception.ExpectedException;
 
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * <p>처리 순서는 다음과 같다.
  * <ol>
- *   <li>Redis에서 이전 대화를 조회한다</li>
+ *   <li>Redis에서 이전 대화를 조회하고 요청한 사용자의 것인지 확인한다</li>
  *   <li>시스템 프롬프트와 메시지 배열을 조립한다</li>
  *   <li>이번 질문을 Redis에 저장한다</li>
  *   <li>토큰을 받는 즉시 전송하면서 동시에 버퍼에 누적한다</li>
@@ -51,12 +52,15 @@ public class StreamChatAnswerService {
     @Qualifier("chatHeartbeatScheduler")
     private final ScheduledExecutorService chatHeartbeatScheduler;
 
-    public SseEmitter execute(String sessionId, ChatAskReqDto req) {
-        if (!conversationRepository.exists(sessionId)) {
-            throw new ExpectedException("만료되었거나 존재하지 않는 채팅 세션입니다.", HttpStatus.NOT_FOUND);
-        }
+    public SseEmitter execute(Long userId, String sessionId, ChatAskReqDto req) {
+        // 남의 세션을 넘겨도 만료와 똑같이 404다. 존재 여부를 알려주면 sessionId를 넣어보며
+        // 유효한 값을 찾아낼 수 있다
+        Conversation conversation = conversationRepository.find(sessionId)
+                .filter(it -> it.ownedBy(userId))
+                .orElseThrow(() -> new ExpectedException(
+                        "만료되었거나 존재하지 않는 채팅 세션입니다.", HttpStatus.NOT_FOUND));
 
-        List<ChatMessage> history = conversationRepository.findMessages(sessionId);
+        List<ChatMessage> history = conversation.messages();
         String systemPrompt = chatPromptAssembler.assembleSystemPrompt(req.message());
         List<ChatMessage> messages = chatPromptAssembler.assembleMessages(history, req.message());
         chatPromptAssembler.logAssembled(systemPrompt, messages);
