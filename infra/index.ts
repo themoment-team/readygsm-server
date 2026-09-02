@@ -174,6 +174,34 @@ new aws.iam.RolePolicy(`${prefix}-ec2-certbot-policy`, {
     }),
 });
 
+// ── IAM Policy (EC2 → 배포용 시크릿을 SSM Parameter Store에서 조회) ──
+// CI가 명령어에 시크릿 평문을 담아 보내면 SSM 명령 이력/CloudTrail에 노출되므로,
+// CI는 SecureString 파라미터만 기록하고 EC2가 자신의 역할로 직접 조회해서 사용한다.
+new aws.iam.RolePolicy(`${prefix}-ec2-ssm-parameter-policy`, {
+    name: `${prefix}-ec2-ssm-parameter-policy`,
+    role: ec2Role.id,
+    policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+            {
+                Effect: "Allow",
+                Action: ["ssm:GetParameter", "ssm:GetParameters"],
+                Resource: `arn:aws:ssm:ap-northeast-2:*:parameter/${prefix}/*`,
+            },
+            {
+                Effect: "Allow",
+                Action: "kms:Decrypt",
+                Resource: "*",
+                Condition: {
+                    StringEquals: {
+                        "kms:ViaService": "ssm.ap-northeast-2.amazonaws.com",
+                    },
+                },
+            },
+        ],
+    }),
+});
+
 // ── S3 백업 버킷 ──────────────────────────────────────────
 const backupBucket = new aws.s3.BucketV2(`${prefix}-backup`, {
     bucket: `${prefix}-backup`,
