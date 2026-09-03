@@ -18,6 +18,84 @@ public class DiscordNotificationService {
     private final RestClient restClient;
 
     @Async("discordExecutor")
+    public void sendApplicationCreated(
+            String activityName,
+            Long activityId,
+            String applicantName,
+            String schoolName,
+            long currentApplicants,
+            long currentReserveApplicants) {
+        String webhookUrl = discordProperties.webhookUrl();
+        if (webhookUrl == null || webhookUrl.isBlank()) {
+            return;
+        }
+        try {
+            String detail = buildApplicationDetail(
+                    activityName, activityId, applicantName, schoolName,
+                    currentApplicants, currentReserveApplicants);
+            DiscordWebhookPayload payload = DiscordWebhookPayload.applicationCreated(detail);
+            restClient.post()
+                    .uri(webhookUrl)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            log.warn("[DISCORD] 알림 전송 실패", e);
+        }
+    }
+
+    @Async("discordExecutor")
+    public void sendApplicationCancelled(
+            String activityName,
+            Long activityId,
+            String applicantName,
+            String schoolName,
+            long currentApplicants,
+            long currentReserveApplicants) {
+        String webhookUrl = discordProperties.webhookUrl();
+        if (webhookUrl == null || webhookUrl.isBlank()) {
+            return;
+        }
+        try {
+            String detail = buildApplicationDetail(
+                    activityName, activityId, applicantName, schoolName,
+                    currentApplicants, currentReserveApplicants);
+            DiscordWebhookPayload payload = DiscordWebhookPayload.applicationCancelled(detail);
+            restClient.post()
+                    .uri(webhookUrl)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            log.warn("[DISCORD] 알림 전송 실패", e);
+        }
+    }
+
+    private String buildApplicationDetail(
+            String activityName,
+            Long activityId,
+            String applicantName,
+            String schoolName,
+            long currentApplicants,
+            long currentReserveApplicants) {
+        return String.format("""
+                **활동:** %s (ID: %d)
+                **신청자:** %s
+                **학교:** %s
+                **현재 인원:** %d명 (대기 %d명)""",
+                activityName, activityId,
+                maskName(applicantName),
+                schoolName,
+                currentApplicants, currentReserveApplicants);
+    }
+
+    private String maskName(String name) {
+        if (name == null || name.isBlank()) return "N/A";
+        if (name.length() < 2) return name;
+        return name.charAt(0) + "*" + name.substring(2);
+    }
+
+    @Async("discordExecutor")
     public void sendServerError(
             String title,
             String description,
