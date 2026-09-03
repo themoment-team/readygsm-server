@@ -103,7 +103,9 @@ public class ChatController {
     ) {
         chatRateLimiter.validateAsk(userId);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CACHE_CONTROL, "no-cache")
+                // no-transform이 없으면 프론트의 Next.js dev 서버가 text/event-stream을 gzip으로 압축한다.
+                // 이벤트마다 flush하지 않아 응답 전체가 한 덩어리로 도착한다
+                .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-transform")
                 .header("X-Accel-Buffering", "no")
                 .contentType(MediaType.TEXT_EVENT_STREAM)
                 .body(streamChatAnswerService.execute(userId, sessionId, req));
