@@ -25,23 +25,9 @@ public class DiscordNotificationService {
             String schoolName,
             long currentApplicants,
             long currentReserveApplicants) {
-        String webhookUrl = discordProperties.webhookUrl();
-        if (webhookUrl == null || webhookUrl.isBlank()) {
-            return;
-        }
-        try {
-            String detail = buildApplicationDetail(
-                    activityName, activityId, applicantName, schoolName,
-                    currentApplicants, currentReserveApplicants);
-            DiscordWebhookPayload payload = DiscordWebhookPayload.applicationCreated(detail);
-            restClient.post()
-                    .uri(webhookUrl)
-                    .body(payload)
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (Exception e) {
-            log.warn("[DISCORD] 알림 전송 실패", e);
-        }
+        sendApplicationNotification(DiscordWebhookPayload.applicationCreated(buildApplicationDetail(
+                activityName, activityId, applicantName, schoolName,
+                currentApplicants, currentReserveApplicants)));
     }
 
     @Async("discordExecutor")
@@ -52,15 +38,17 @@ public class DiscordNotificationService {
             String schoolName,
             long currentApplicants,
             long currentReserveApplicants) {
+        sendApplicationNotification(DiscordWebhookPayload.applicationCancelled(buildApplicationDetail(
+                activityName, activityId, applicantName, schoolName,
+                currentApplicants, currentReserveApplicants)));
+    }
+
+    private void sendApplicationNotification(DiscordWebhookPayload payload) {
         String webhookUrl = discordProperties.webhookUrl();
         if (webhookUrl == null || webhookUrl.isBlank()) {
             return;
         }
         try {
-            String detail = buildApplicationDetail(
-                    activityName, activityId, applicantName, schoolName,
-                    currentApplicants, currentReserveApplicants);
-            DiscordWebhookPayload payload = DiscordWebhookPayload.applicationCancelled(detail);
             restClient.post()
                     .uri(webhookUrl)
                     .body(payload)
@@ -83,16 +71,22 @@ public class DiscordNotificationService {
                 **신청자:** %s
                 **학교:** %s
                 **현재 인원:** %d명 (대기 %d명)""",
-                activityName, activityId,
+                sanitize(activityName), activityId,
                 maskName(applicantName),
-                schoolName,
+                sanitize(schoolName),
                 currentApplicants, currentReserveApplicants);
+    }
+
+    private String sanitize(String value) {
+        if (value == null) return "";
+        return value.replaceAll("[\\r\\n*_`~|]", " ").trim();
     }
 
     private String maskName(String name) {
         if (name == null || name.isBlank()) return "N/A";
-        if (name.length() < 2) return name;
-        return name.charAt(0) + "*" + name.substring(2);
+        String sanitized = sanitize(name);
+        if (sanitized.length() <= 1) return sanitized + "*";
+        return sanitized.charAt(0) + "*" + sanitized.substring(2);
     }
 
     @Async("discordExecutor")
