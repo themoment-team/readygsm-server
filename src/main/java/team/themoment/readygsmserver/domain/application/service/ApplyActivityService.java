@@ -13,6 +13,7 @@ import team.themoment.readygsmserver.domain.application.repository.ApplicationRe
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 import team.themoment.readygsmserver.domain.user.repository.UserRepository;
+import team.themoment.readygsmserver.global.discord.DiscordNotificationService;
 import team.themoment.sdk.exception.ExpectedException;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ public class ApplyActivityService {
     private final ApplicationRepository applicationRepository;
     private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
+    private final DiscordNotificationService discordNotificationService;
 
     public ApplicationResDto execute(Long userId, Long activityId, ApplicationReqDto req) {
         ActivityJpaEntity activity = activityRepository.findByIdWithLock(activityId)
@@ -68,6 +70,13 @@ public class ApplyActivityService {
                         .isReserve(isReserve)
                         .build()
         );
+
+        long newMainApplicants = isReserve ? currentMainApplicants : currentMainApplicants + 1;
+        long newReserveApplicants = isReserve ? currentReserveApplicants + 1 : currentReserveApplicants;
+        discordNotificationService.sendApplicationCreated(
+                activity.getName(), activity.getId(),
+                req.name(), req.schoolName(),
+                newMainApplicants, newReserveApplicants);
 
         Integer reserveOrder = isReserve ? (int) currentReserveApplicants + 1 : null;
         return ApplicationResDto.from(saved, reserveOrder);
