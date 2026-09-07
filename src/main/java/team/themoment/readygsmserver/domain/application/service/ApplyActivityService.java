@@ -13,6 +13,7 @@ import team.themoment.readygsmserver.domain.application.repository.ApplicationRe
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 import team.themoment.readygsmserver.domain.user.repository.UserRepository;
+import team.themoment.readygsmserver.global.constant.TimeZoneConstant;
 import team.themoment.readygsmserver.global.discord.DiscordNotificationService;
 import team.themoment.sdk.exception.ExpectedException;
 
@@ -38,7 +39,7 @@ public class ApplyActivityService {
                 .orElseThrow(() -> new ExpectedException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (user.getRole() == Role.USER) {
-            LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
+            LocalDateTime now = LocalDateTime.now(TimeZoneConstant.KST);
             if (now.isBefore(activity.getRegistrationStartAt()) || now.isAfter(activity.getRegistrationEndAt())) {
                 throw new ExpectedException("신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
             }

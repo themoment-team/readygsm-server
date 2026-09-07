@@ -13,11 +13,11 @@ import team.themoment.readygsmserver.domain.activity.repository.ActivityReposito
 import team.themoment.readygsmserver.domain.application.dto.response.ExcelExportResDto;
 import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 import team.themoment.readygsmserver.domain.application.repository.ApplicationRepository;
+import team.themoment.readygsmserver.global.constant.TimeZoneConstant;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -49,8 +49,6 @@ public class ExportApplicationExcelService {
     private static final DateTimeFormatter FILE_NAME_TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-
     private static final String ILLEGAL_FILE_NAME_CHARS = "[\\\\/:*?\"<>|\\x00-\\x1F]";
 
     private final ApplicationRepository applicationRepository;
@@ -68,7 +66,7 @@ public class ExportApplicationExcelService {
     }
 
     private String buildFileName(String activityName) {
-        String timestamp = LocalDateTime.now(KST).format(FILE_NAME_TIMESTAMP_FORMATTER);
+        String timestamp = LocalDateTime.now(TimeZoneConstant.KST).format(FILE_NAME_TIMESTAMP_FORMATTER);
         return sanitizeFileName(activityName) + "-" + timestamp + ".xlsx";
     }
 
