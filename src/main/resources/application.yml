@@ -122,4 +122,4 @@ sdk:
       - "/api/**"
 
 discord:
-  webhook-url: ${DISCORD_ERROR_WEBHOOK_URL:}
+  webhook-url: ${DISCORD_WEBHOOK_URL:}

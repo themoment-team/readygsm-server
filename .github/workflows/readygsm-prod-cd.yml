@@ -97,7 +97,7 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
-          DISCORD_ERROR_WEBHOOK_URL: ${{ secrets.DISCORD_ERROR_WEBHOOK_URL }}
+          PROD_DISCORD_WEBHOOK_URL: ${{ secrets.PROD_DISCORD_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -e
@@ -112,7 +112,7 @@ jobs:
           put google-client-secret "$GOOGLE_CLIENT_SECRET"
           put kakao-client-id "$KAKAO_CLIENT_ID"
           put kakao-client-secret "$KAKAO_CLIENT_SECRET"
-          put discord-webhook-url "$DISCORD_ERROR_WEBHOOK_URL"
+          put discord-webhook-url "$PROD_DISCORD_WEBHOOK_URL"
           put openai-api-key "$OPENAI_API_KEY"
 
       - name: Deploy to EC2 via SSM
@@ -169,7 +169,7 @@ jobs:
           KAKAO_CLIENT_ID=\$(get_param kakao-client-id)
           KAKAO_CLIENT_SECRET=\$(get_param kakao-client-secret)
           PROD_ECR_IMAGE=$PROD_ECR_IMAGE
-          DISCORD_ERROR_WEBHOOK_URL=\$(get_param discord-webhook-url)
+          PROD_DISCORD_WEBHOOK_URL=\$(get_param discord-webhook-url)
           OPENAI_API_KEY=\$(get_param openai-api-key)
           ENVEOF
 
