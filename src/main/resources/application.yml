@@ -78,8 +78,6 @@ cors:
     - "https://stage-admin-ready.hellogsm.kr"
 
 oauth2:
-  success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
-  failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:/}
   allowed-redirect-uris:
     - "http://localhost:3000/oauth/callback"
     - "https://stage.readygsm.kr/oauth/callback"
