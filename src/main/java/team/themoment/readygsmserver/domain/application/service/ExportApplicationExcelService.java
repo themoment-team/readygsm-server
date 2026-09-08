@@ -1,6 +1,7 @@
 package team.themoment.readygsmserver.domain.application.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -108,7 +110,8 @@ public class ExportApplicationExcelService {
             workbook.write(out);
             return out.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("엑셀 파일 생성에 실패했습니다.", e);
+            log.error("엑셀 파일 생성에 실패했습니다.", e);
+            throw new ExpectedException("엑셀 파일 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
