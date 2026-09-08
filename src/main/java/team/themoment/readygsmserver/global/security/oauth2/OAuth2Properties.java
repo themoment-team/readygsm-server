@@ -9,8 +9,6 @@ import java.util.List;
 @Validated
 @ConfigurationProperties(prefix = "oauth2")
 public record OAuth2Properties(
-        String successRedirectUrl,
-        String failureRedirectUrl,
         @NotNull List<String> allowedRedirectUris
 ) {
 }
