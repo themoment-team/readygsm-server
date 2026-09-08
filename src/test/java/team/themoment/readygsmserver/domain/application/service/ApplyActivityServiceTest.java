@@ -16,11 +16,11 @@ import team.themoment.readygsmserver.domain.application.repository.ApplicationRe
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 import team.themoment.readygsmserver.domain.user.repository.UserRepository;
+import team.themoment.readygsmserver.global.constant.TimeZoneConstant;
 import team.themoment.readygsmserver.global.discord.DiscordNotificationService;
 import team.themoment.sdk.exception.ExpectedException;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +53,7 @@ class ApplyActivityServiceTest {
 
     @BeforeEach
     void setUp() {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = LocalDateTime.now(TimeZoneConstant.KST);
         ActivityJpaEntity activity = ActivityJpaEntity.builder()
                 .id(ACTIVITY_ID)
                 .name("체험")
