@@ -75,10 +75,9 @@ cors:
     - "https://ready.hellogsm.kr"
     - "https://www.ready.hellogsm.kr"
     - "https://stage-client-ready.hellogsm.kr"
+    - "https://stage-admin-ready.hellogsm.kr"
 
 oauth2:
-  success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:/}
-  failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:/}
   allowed-redirect-uris:
     - "http://localhost:3000/oauth/callback"
     - "https://stage.readygsm.kr/oauth/callback"
@@ -121,4 +120,4 @@ sdk:
       - "/api/**"
 
 discord:
-  webhook-url: ${DISCORD_ERROR_WEBHOOK_URL:}
+  webhook-url: ${DISCORD_WEBHOOK_URL:}

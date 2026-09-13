@@ -9,10 +9,14 @@ import team.themoment.sdk.exception.ExpectedException;
 import java.time.Duration;
 
 /**
- * IP 단위 요청 제한.
+ * 사용자 단위 요청 제한. 제한이 없으면 사실상 무료 AI API가 된다.
  *
- * <p>엔드포인트가 공개되어 있어 제한이 없으면 사실상 무료 AI API가 된다.
- * 인증이 없으므로 세션 단위로 세면 세션을 새로 발급받아 우회할 수 있어 IP를 기준으로 센다.
+ * <p>IP가 아니라 사용자로 센다. 학교망처럼 여러 사람이 한 공인 IP를 쓰는 환경에서는
+ * IP로 세면 한 사람이 한도를 다 쓰고 나머지가 막힌다. 프록시 뒤에서 실제 IP를 알아내려면
+ * 신뢰할 수 있는 헤더 설정도 따로 필요하다.
+ *
+ * <p>계정을 여러 개 만들어 우회할 수는 있지만 소셜 로그인 계정을 새로 만드는 비용이
+ * 충분한 문턱이 된다.
  */
 @Component
 @RequiredArgsConstructor
@@ -30,12 +34,12 @@ public class ChatRateLimiter {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    public void validateAsk(String clientIp) {
-        validate(ASK_KEY_PREFIX + clientIp, MAX_ASK_PER_WINDOW);
+    public void validateAsk(Long userId) {
+        validate(ASK_KEY_PREFIX + userId, MAX_ASK_PER_WINDOW);
     }
 
-    public void validateSessionCreation(String clientIp) {
-        validate(SESSION_KEY_PREFIX + clientIp, MAX_SESSION_PER_WINDOW);
+    public void validateSessionCreation(Long userId) {
+        validate(SESSION_KEY_PREFIX + userId, MAX_SESSION_PER_WINDOW);
     }
 
     private void validate(String key, long maxRequests) {

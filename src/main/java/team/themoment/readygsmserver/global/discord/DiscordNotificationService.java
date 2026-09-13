@@ -18,6 +18,78 @@ public class DiscordNotificationService {
     private final RestClient restClient;
 
     @Async("discordExecutor")
+    public void sendApplicationCreated(
+            String activityName,
+            Long activityId,
+            String applicantName,
+            String schoolName,
+            long currentApplicants,
+            long currentReserveApplicants) {
+        sendApplicationNotification(DiscordWebhookPayload.applicationCreated(buildApplicationDetail(
+                activityName, activityId, applicantName, schoolName,
+                currentApplicants, currentReserveApplicants)));
+    }
+
+    @Async("discordExecutor")
+    public void sendApplicationCancelled(
+            String activityName,
+            Long activityId,
+            String applicantName,
+            String schoolName,
+            long currentApplicants,
+            long currentReserveApplicants) {
+        sendApplicationNotification(DiscordWebhookPayload.applicationCancelled(buildApplicationDetail(
+                activityName, activityId, applicantName, schoolName,
+                currentApplicants, currentReserveApplicants)));
+    }
+
+    private void sendApplicationNotification(DiscordWebhookPayload payload) {
+        String webhookUrl = discordProperties.webhookUrl();
+        if (webhookUrl == null || webhookUrl.isBlank()) {
+            return;
+        }
+        try {
+            restClient.post()
+                    .uri(webhookUrl)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            log.warn("[DISCORD] 알림 전송 실패", e);
+        }
+    }
+
+    private String buildApplicationDetail(
+            String activityName,
+            Long activityId,
+            String applicantName,
+            String schoolName,
+            long currentApplicants,
+            long currentReserveApplicants) {
+        return String.format("""
+                **활동:** %s (ID: %d)
+                **신청자:** %s
+                **학교:** %s
+                **현재 인원:** %d명 (대기 %d명)""",
+                sanitize(activityName), activityId,
+                maskName(applicantName),
+                sanitize(schoolName),
+                currentApplicants, currentReserveApplicants);
+    }
+
+    private String sanitize(String value) {
+        if (value == null) return "";
+        return value.replaceAll("[\\r\\n*_`~|]", " ").trim();
+    }
+
+    private String maskName(String name) {
+        if (name == null || name.isBlank()) return "N/A";
+        String sanitized = sanitize(name);
+        if (sanitized.length() <= 1) return sanitized + "*";
+        return sanitized.charAt(0) + "*" + sanitized.substring(2);
+    }
+
+    @Async("discordExecutor")
     public void sendServerError(
             String title,
             String description,

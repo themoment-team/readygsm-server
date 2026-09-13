@@ -1,6 +1,7 @@
 package team.themoment.readygsmserver.domain.application.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -13,14 +14,15 @@ import team.themoment.readygsmserver.domain.activity.repository.ActivityReposito
 import team.themoment.readygsmserver.domain.application.dto.response.ExcelExportResDto;
 import team.themoment.readygsmserver.domain.application.entity.ApplicationJpaEntity;
 import team.themoment.readygsmserver.domain.application.repository.ApplicationRepository;
+import team.themoment.readygsmserver.global.constant.TimeZoneConstant;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -49,8 +51,6 @@ public class ExportApplicationExcelService {
     private static final DateTimeFormatter FILE_NAME_TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-
     private static final String ILLEGAL_FILE_NAME_CHARS = "[\\\\/:*?\"<>|\\x00-\\x1F]";
 
     private final ApplicationRepository applicationRepository;
@@ -68,7 +68,7 @@ public class ExportApplicationExcelService {
     }
 
     private String buildFileName(String activityName) {
-        String timestamp = LocalDateTime.now(KST).format(FILE_NAME_TIMESTAMP_FORMATTER);
+        String timestamp = LocalDateTime.now(TimeZoneConstant.KST).format(FILE_NAME_TIMESTAMP_FORMATTER);
         return sanitizeFileName(activityName) + "-" + timestamp + ".xlsx";
     }
 
@@ -110,7 +110,8 @@ public class ExportApplicationExcelService {
             workbook.write(out);
             return out.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("엑셀 파일 생성에 실패했습니다.", e);
+            log.error("엑셀 파일 생성에 실패했습니다.", e);
+            throw new ExpectedException("엑셀 파일 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

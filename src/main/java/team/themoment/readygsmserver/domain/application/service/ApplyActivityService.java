@@ -13,6 +13,8 @@ import team.themoment.readygsmserver.domain.application.repository.ApplicationRe
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 import team.themoment.readygsmserver.domain.user.repository.UserRepository;
+import team.themoment.readygsmserver.global.constant.TimeZoneConstant;
+import team.themoment.readygsmserver.global.discord.DiscordNotificationService;
 import team.themoment.sdk.exception.ExpectedException;
 
 import java.time.LocalDateTime;
@@ -27,6 +29,7 @@ public class ApplyActivityService {
     private final ApplicationRepository applicationRepository;
     private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
+    private final DiscordNotificationService discordNotificationService;
 
     public ApplicationResDto execute(Long userId, Long activityId, ApplicationReqDto req) {
         ActivityJpaEntity activity = activityRepository.findByIdWithLock(activityId)
@@ -36,7 +39,7 @@ public class ApplyActivityService {
                 .orElseThrow(() -> new ExpectedException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (user.getRole() == Role.USER) {
-            LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Seoul"));
+            LocalDateTime now = LocalDateTime.now(TimeZoneConstant.KST);
             if (now.isBefore(activity.getRegistrationStartAt()) || now.isAfter(activity.getRegistrationEndAt())) {
                 throw new ExpectedException("신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
             }
@@ -68,6 +71,13 @@ public class ApplyActivityService {
                         .isReserve(isReserve)
                         .build()
         );
+
+        long newMainApplicants = isReserve ? currentMainApplicants : currentMainApplicants + 1;
+        long newReserveApplicants = isReserve ? currentReserveApplicants + 1 : currentReserveApplicants;
+        discordNotificationService.sendApplicationCreated(
+                activity.getName(), activity.getId(),
+                req.name(), req.schoolName(),
+                newMainApplicants, newReserveApplicants);
 
         Integer reserveOrder = isReserve ? (int) currentReserveApplicants + 1 : null;
         return ApplicationResDto.from(saved, reserveOrder);

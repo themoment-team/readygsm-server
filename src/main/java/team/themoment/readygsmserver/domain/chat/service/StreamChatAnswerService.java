@@ -10,6 +10,7 @@ import team.themoment.readygsmserver.domain.chat.dto.request.ChatAskReqDto;
 import team.themoment.readygsmserver.domain.chat.dto.response.ChatDoneResDto;
 import team.themoment.readygsmserver.domain.chat.dto.response.ChatErrorResDto;
 import team.themoment.readygsmserver.domain.chat.entity.ChatMessage;
+import team.themoment.readygsmserver.domain.chat.entity.Conversation;
 import team.themoment.readygsmserver.domain.chat.repository.ConversationRepository;
 import team.themoment.sdk.exception.ExpectedException;
 
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * <p>처리 순서는 다음과 같다.
  * <ol>
- *   <li>Redis에서 이전 대화를 조회한다</li>
+ *   <li>Redis에서 이전 대화를 조회하고 요청한 사용자의 것인지 확인한다</li>
  *   <li>시스템 프롬프트와 메시지 배열을 조립한다</li>
  *   <li>이번 질문을 Redis에 저장한다</li>
  *   <li>토큰을 받는 즉시 전송하면서 동시에 버퍼에 누적한다</li>
@@ -40,9 +41,21 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 public class StreamChatAnswerService {
 
+    /** 토큰이 계속 오는 긴 답변의 절대 상한. 유휴 타임아웃과는 성격이 다르다. */
     private static final long EMITTER_TIMEOUT_MILLIS = 180_000L;
+
     private static final long HEARTBEAT_INTERVAL_SECONDS = 15L;
+
+    /**
+     * 마지막 토큰 이후 이만큼 조용하면 끊는다. upstream이 오류 없이 멈추는 경우가 있는데,
+     * 이게 없으면 emitter 타임아웃 180초까지 멈춘 화면을 그대로 보게 된다.
+     *
+     * <p>첫 토큰을 기다리는 구간에도 적용된다. TTFT가 길어야 15초 안팎이라 오탐 여지는 없다.
+     */
+    private static final long IDLE_TIMEOUT_MILLIS = 30_000L;
+
     private static final String ERROR_REASON_UPSTREAM_INTERRUPTED = "upstream_interrupted";
+    private static final String ERROR_REASON_IDLE_TIMEOUT = "idle_timeout";
 
     private final ConversationRepository conversationRepository;
     private final ChatCompletionClient chatCompletionClient;
@@ -51,12 +64,15 @@ public class StreamChatAnswerService {
     @Qualifier("chatHeartbeatScheduler")
     private final ScheduledExecutorService chatHeartbeatScheduler;
 
-    public SseEmitter execute(String sessionId, ChatAskReqDto req) {
-        if (!conversationRepository.exists(sessionId)) {
-            throw new ExpectedException("만료되었거나 존재하지 않는 채팅 세션입니다.", HttpStatus.NOT_FOUND);
-        }
+    public SseEmitter execute(Long userId, String sessionId, ChatAskReqDto req) {
+        // 남의 세션을 넘겨도 만료와 똑같이 404다. 존재 여부를 알려주면 sessionId를 넣어보며
+        // 유효한 값을 찾아낼 수 있다
+        Conversation conversation = conversationRepository.find(sessionId)
+                .filter(it -> it.ownedBy(userId))
+                .orElseThrow(() -> new ExpectedException(
+                        "만료되었거나 존재하지 않는 채팅 세션입니다.", HttpStatus.NOT_FOUND));
 
-        List<ChatMessage> history = conversationRepository.findMessages(sessionId);
+        List<ChatMessage> history = conversation.messages();
         String systemPrompt = chatPromptAssembler.assembleSystemPrompt(req.message());
         List<ChatMessage> messages = chatPromptAssembler.assembleMessages(history, req.message());
         chatPromptAssembler.logAssembled(systemPrompt, messages);
@@ -100,6 +116,9 @@ public class StreamChatAnswerService {
         /** 저장용 누적 버퍼. 전송과는 무관하다. */
         private final StringBuilder answer = new StringBuilder();
 
+        /** 유휴 판정 기준. 스트림 스레드가 쓰고 스케줄러 스레드가 읽는다. */
+        private volatile long lastTokenAt;
+
         private ChatStream(String sessionId, String question, SseEmitter emitter) {
             this.sessionId = sessionId;
             this.question = question;
@@ -107,8 +126,9 @@ public class StreamChatAnswerService {
         }
 
         private void start(String systemPrompt, List<ChatMessage> messages) {
+            lastTokenAt = System.currentTimeMillis();
             heartbeat.set(chatHeartbeatScheduler.scheduleAtFixedRate(
-                    this::sendHeartbeat,
+                    this::tick,
                     HEARTBEAT_INTERVAL_SECONDS,
                     HEARTBEAT_INTERVAL_SECONDS,
                     TimeUnit.SECONDS
@@ -123,6 +143,7 @@ public class StreamChatAnswerService {
 
         @Override
         public void onToken(String token) {
+            lastTokenAt = System.currentTimeMillis();
             answer.append(token);
             send(SseEmitter.event().data(token));
         }
@@ -134,18 +155,37 @@ public class StreamChatAnswerService {
             }
             saveAnswer();
             send(SseEmitter.event().name("done").data(new ChatDoneResDto(finishReason)));
-            stopHeartbeat();
-            emitter.complete();
+            finish();
         }
 
         @Override
         public void onError(Throwable e) {
+            log.warn("[CHAT] 응답 생성 실패 sessionId={}", sessionId, e);
+            fail(ERROR_REASON_UPSTREAM_INTERRUPTED);
+        }
+
+        @Override
+        public void onAbort() {
             if (!finished.compareAndSet(false, true)) {
                 return;
             }
-            log.warn("[CHAT] 응답 생성 실패, 답변을 저장하지 않습니다 sessionId={}", sessionId, e);
-            send(SseEmitter.event().name("error").data(new ChatErrorResDto(ERROR_REASON_UPSTREAM_INTERRUPTED)));
+            log.info("[CHAT] 신호 없이 스트림을 끊습니다 sessionId={}", sessionId);
+            finish();
+        }
+
+        /** 중단된 답변은 저장하지 않는다. 다음 질문의 맥락을 오염시킨다. */
+        private void fail(String reason) {
+            if (!finished.compareAndSet(false, true)) {
+                return;
+            }
+            send(SseEmitter.event().name("error").data(new ChatErrorResDto(reason)));
+            finish();
+        }
+
+        /** heartbeat를 멈추고 upstream을 놓아준 뒤 응답을 닫는다. */
+        private void finish() {
             stopHeartbeat();
+            cancelSubscription();
             emitter.complete();
         }
 
@@ -169,7 +209,17 @@ public class StreamChatAnswerService {
             }
         }
 
-        private void sendHeartbeat() {
+        /**
+         * heartbeat 전송과 유휴 검사를 겸한다. 검사 주기가 15초라 유휴 판정은
+         * 30초 정확히가 아니라 30~45초 사이에 일어난다.
+         */
+        private void tick() {
+            if (System.currentTimeMillis() - lastTokenAt >= IDLE_TIMEOUT_MILLIS) {
+                log.warn("[CHAT] upstream이 {}초 넘게 조용해 스트림을 정리합니다 sessionId={}",
+                        IDLE_TIMEOUT_MILLIS / 1000, sessionId);
+                fail(ERROR_REASON_IDLE_TIMEOUT);
+                return;
+            }
             send(SseEmitter.event().comment("ping"));
         }
 
@@ -186,11 +236,20 @@ public class StreamChatAnswerService {
 
         /** 연결이 끝났으므로 heartbeat를 멈추고 upstream 구독을 해제한다. */
         private void release() {
-            boolean wasRunning = finished.compareAndSet(false, true);
-            stopHeartbeat();
-            StreamSubscription current = subscription.getAndSet(null);
-            if (current != null && wasRunning) {
+            if (finished.compareAndSet(false, true)) {
                 log.info("[CHAT] 연결이 종료되어 upstream 요청을 취소합니다 sessionId={}", sessionId);
+            }
+            stopHeartbeat();
+            cancelSubscription();
+        }
+
+        /**
+         * 이미 끝난 구독에 cancel을 부르는 것은 안전하다. 반대로 부르지 않으면
+         * 멈춘 upstream 요청이 자기 타임아웃까지 남는다.
+         */
+        private void cancelSubscription() {
+            StreamSubscription current = subscription.getAndSet(null);
+            if (current != null) {
                 current.cancel();
             }
         }

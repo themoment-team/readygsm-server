@@ -16,10 +16,11 @@ import team.themoment.readygsmserver.domain.application.repository.ApplicationRe
 import team.themoment.readygsmserver.domain.user.entity.UserJpaEntity;
 import team.themoment.readygsmserver.domain.user.entity.constant.Role;
 import team.themoment.readygsmserver.domain.user.repository.UserRepository;
+import team.themoment.readygsmserver.global.constant.TimeZoneConstant;
+import team.themoment.readygsmserver.global.discord.DiscordNotificationService;
 import team.themoment.sdk.exception.ExpectedException;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +43,8 @@ class ApplyActivityServiceTest {
     private ActivityRepository activityRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private DiscordNotificationService discordNotificationService;
 
     @InjectMocks
     private ApplyActivityService applyActivityService;
@@ -50,7 +53,7 @@ class ApplyActivityServiceTest {
 
     @BeforeEach
     void setUp() {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = LocalDateTime.now(TimeZoneConstant.KST);
         ActivityJpaEntity activity = ActivityJpaEntity.builder()
                 .id(ACTIVITY_ID)
                 .name("체험")
@@ -89,6 +92,8 @@ class ApplyActivityServiceTest {
 
         assertThat(result.isReserve()).isFalse();
         assertThat(result.reserveOrder()).isNull();
+        verify(discordNotificationService).sendApplicationCreated(
+                "체험", ACTIVITY_ID, "홍길동", "광주소프트웨어마이스터고", 1L, 0L);
     }
 
     @Test
@@ -101,6 +106,8 @@ class ApplyActivityServiceTest {
         assertThat(result.isReserve()).isTrue();
         assertThat(result.reserveOrder()).isEqualTo(3);
         verify(applicationRepository).save(any(ApplicationJpaEntity.class));
+        verify(discordNotificationService).sendApplicationCreated(
+                "체험", ACTIVITY_ID, "홍길동", "광주소프트웨어마이스터고", 2L, 3L);
     }
 
     @Test

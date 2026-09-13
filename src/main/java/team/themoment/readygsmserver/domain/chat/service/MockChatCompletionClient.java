@@ -22,7 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>질문에 아래 키워드가 들어 있으면 해당 상황을 재현한다.
  * <ul>
  *   <li>{@code __slow__} 첫 토큰까지 10초 대기</li>
- *   <li>{@code __cut__} 절반쯤 보내다 아무 신호 없이 중단</li>
+ *   <li>{@code __cut__} 절반쯤 보내다 멈춘 채 유지. 유휴 타임아웃이 정리한다</li>
+ *   <li>{@code __drop__} 절반쯤 보내다 신호 없이 연결을 끊음</li>
  *   <li>{@code __error__} 즉시 onError</li>
  *   <li>{@code __length__} finishReason "length"로 종료</li>
  * </ul>
@@ -35,6 +36,7 @@ public class MockChatCompletionClient implements ChatCompletionClient {
 
     private static final String TRIGGER_SLOW = "__slow__";
     private static final String TRIGGER_CUT = "__cut__";
+    private static final String TRIGGER_DROP = "__drop__";
     private static final String TRIGGER_ERROR = "__error__";
     private static final String TRIGGER_LENGTH = "__length__";
 
@@ -83,6 +85,7 @@ public class MockChatCompletionClient implements ChatCompletionClient {
             }
 
             boolean cut = question.contains(TRIGGER_CUT);
+            boolean drop = question.contains(TRIGGER_DROP);
             int cutAt = ANSWER.length() / 2;
 
             int index = 0;
@@ -91,9 +94,17 @@ public class MockChatCompletionClient implements ChatCompletionClient {
                     log.debug("[CHAT] Mock 스트림이 취소되었습니다");
                     return;
                 }
-                if (cut && index >= cutAt) {
-                    log.info("[CHAT] __cut__ 트리거로 완료 신호 없이 스트림을 중단합니다");
-                    return;
+                if (index >= cutAt) {
+                    if (drop) {
+                        log.info("[CHAT] __drop__ 트리거로 신호 없이 연결을 끊습니다");
+                        handler.onAbort();
+                        return;
+                    }
+                    if (cut) {
+                        // 끊지 않고 멈춘다. upstream이 조용해진 상황이라 유휴 타임아웃이 정리한다
+                        log.info("[CHAT] __cut__ 트리거로 완료 신호 없이 스트림을 멈춥니다");
+                        return;
+                    }
                 }
                 int end = Math.min(index + tokenLength(), ANSWER.length());
                 handler.onToken(ANSWER.substring(index, end));

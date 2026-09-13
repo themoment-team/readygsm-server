@@ -24,8 +24,9 @@ public class SecurityConfig {
             "/api/v1/activity",
             "/api/v1/activity/*",
             "/api/v1/utility/user/role",
-            "/api/v1/chat",
-            "/api/v1/chat/**",
+            // 챗봇 본체는 로그인이 필요하다. 검증용 SSE 엔드포인트만 열어둔다
+            // (로그인 쿠키 없이 curl -N으로 확인해야 해서다. 프론트 연동이 끝나면 함께 삭제한다)
+            "/api/v1/chat/test-sse",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs",
