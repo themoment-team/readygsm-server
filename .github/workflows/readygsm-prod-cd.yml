@@ -89,6 +89,7 @@ jobs:
       - name: Sync secrets to SSM Parameter Store
         env:
           AWS_REGION: ${{ env.AWS_REGION }}
+          APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
           PROD_MYSQL_USERNAME: ${{ secrets.PROD_MYSQL_USERNAME }}
           PROD_MYSQL_PASSWORD: ${{ secrets.PROD_MYSQL_PASSWORD }}
           PROD_MYSQL_ROOT_PASSWORD: ${{ secrets.PROD_MYSQL_ROOT_PASSWORD }}
