@@ -76,6 +76,8 @@ cors:
     - "https://www.ready.hellogsm.kr"
     - "https://stage-client-ready.hellogsm.kr"
     - "https://stage-admin-ready.hellogsm.kr"
+    - "https://admin.ready.hellogsm.kr"
+    - "https://www.admin.ready.hellogsm.kr"
 
 oauth2:
   allowed-redirect-uris:
@@ -87,6 +89,8 @@ oauth2:
     - "https://www.ready.hellogsm.kr/oauth/callback"
     - "https://stage-client-ready.hellogsm.kr/oauth/callback"
     - "https://stage-admin-ready.hellogsm.kr/oauth/callback"
+    - "https://admin.ready.hellogsm.kr/oauth/callback"
+    - "https://www.admin.ready.hellogsm.kr/oauth/callback"
 
 sdk:
   logging:
