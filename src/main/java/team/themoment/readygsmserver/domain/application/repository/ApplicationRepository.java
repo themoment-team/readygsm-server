@@ -35,4 +35,6 @@ public interface ApplicationRepository extends JpaRepository<ApplicationJpaEntit
     @Modifying
     @Query("DELETE FROM ApplicationJpaEntity a WHERE a.id = :id")
     int deleteByApplicationId(@Param("id") Long id);
+
+    boolean existsByPhoneNumber(String phoneNumber);
 }
