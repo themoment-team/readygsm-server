@@ -39,6 +39,10 @@ public class ApplyActivityService {
                 .orElseThrow(() -> new ExpectedException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
 
         if (user.getRole() == Role.USER) {
+            if (applicationRepository.existsByPhoneNumber(req.phoneNumber())) {
+                throw new ExpectedException("이미 신청한 전화번호입니다.", HttpStatus.CONFLICT);
+            }
+
             LocalDateTime now = LocalDateTime.now(TimeZoneConstant.KST);
             if (now.isBefore(activity.getRegistrationStartAt()) || now.isAfter(activity.getRegistrationEndAt())) {
                 throw new ExpectedException("신청 기간이 아닙니다.", HttpStatus.BAD_REQUEST);
