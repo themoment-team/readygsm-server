@@ -78,7 +78,7 @@ class ApplyActivityServiceTest {
 
         when(activityRepository.findByIdWithLock(ACTIVITY_ID)).thenReturn(Optional.of(activity));
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        when(applicationRepository.existsByUser_Id(USER_ID)).thenReturn(false);
+        lenient().when(applicationRepository.existsByUser_Id(USER_ID)).thenReturn(false);
         lenient().when(applicationRepository.save(any(ApplicationJpaEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
     }
@@ -123,5 +123,35 @@ class ApplyActivityServiceTest {
                 });
 
         verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    void USER가_이미_신청된_전화번호로_신청하면_예외가_발생한다() {
+        when(applicationRepository.existsByPhoneNumber(req.phoneNumber())).thenReturn(true);
+
+        assertThatThrownBy(() -> applyActivityService.execute(USER_ID, ACTIVITY_ID, req))
+                .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.throwable(ExpectedException.class))
+                .satisfies(ex -> {
+                    assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                    assertThat(ex.getMessage()).isEqualTo("이미 신청한 전화번호입니다.");
+                });
+
+        verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    void ADMIN은_중복된_전화번호여도_전화번호_중복_체크_없이_신청할_수_있다() {
+        UserJpaEntity admin = UserJpaEntity.builder()
+                .id(USER_ID)
+                .role(Role.ADMIN)
+                .build();
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(admin));
+        when(applicationRepository.countByActivity_IdAndIsReserve(ACTIVITY_ID, false)).thenReturn(0L);
+        when(applicationRepository.countByActivity_IdAndIsReserve(ACTIVITY_ID, true)).thenReturn(0L);
+
+        ApplicationResDto result = applyActivityService.execute(USER_ID, ACTIVITY_ID, req);
+
+        assertThat(result.isReserve()).isFalse();
+        verify(applicationRepository, never()).existsByPhoneNumber(any());
     }
 }
