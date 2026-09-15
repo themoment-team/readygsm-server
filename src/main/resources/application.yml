@@ -55,8 +55,8 @@ kakao:
     client-secret: ${KAKAO_CLIENT_SECRET}
 
 chat:
-  # mock | openai — OpenAI 키가 없어도 mock으로 전체 파이프라인이 동작한다
-  client: ${CHAT_CLIENT:mock}
+  # openai | mock — mock은 중단·타임아웃 같은 실패 재현이 필요할 때만 로컬에서 켠다
+  client: ${CHAT_CLIENT:openai}
 
 openai:
   api-key: ${OPENAI_API_KEY:}

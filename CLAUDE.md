@@ -29,3 +29,4 @@ The following environment variables are required before running.
 | `GOOGLE_CLIENT_SECRET` | Google OAuth2 client secret |
 | `KAKAO_CLIENT_ID` | Kakao OAuth2 REST API key |
 | `KAKAO_CLIENT_SECRET` | Kakao OAuth2 client secret |
+| `OPENAI_API_KEY` | OpenAI API key for the chatbot (boot fails if empty; set `CHAT_CLIENT=mock` to run without it) |

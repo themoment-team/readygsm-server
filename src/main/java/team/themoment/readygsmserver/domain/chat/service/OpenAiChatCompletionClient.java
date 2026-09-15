@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "chat", name = "client", havingValue = "openai")
+@ConditionalOnProperty(prefix = "chat", name = "client", havingValue = "openai", matchIfMissing = true)
 public class OpenAiChatCompletionClient implements ChatCompletionClient {
 
     private static final String CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
