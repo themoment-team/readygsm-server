@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "chat", name = "client", havingValue = "mock", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "chat", name = "client", havingValue = "mock")
 public class MockChatCompletionClient implements ChatCompletionClient {
 
     private static final String TRIGGER_SLOW = "__slow__";
