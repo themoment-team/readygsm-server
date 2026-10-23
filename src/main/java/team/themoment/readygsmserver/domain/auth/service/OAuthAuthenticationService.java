@@ -82,7 +82,7 @@ public class OAuthAuthenticationService {
             throw new ExpectedException("redirect_uri는 필수입니다.", HttpStatus.BAD_REQUEST);
         }
         if (!oauth2Properties.allowedRedirectUris().contains(redirectUri)) {
-            throw new ExpectedException("허용되지 않은 redirect_uri입니다: " + redirectUri, HttpStatus.BAD_REQUEST);
+            throw new ExpectedException("허용되지 않은 redirect_uri입니다.", HttpStatus.BAD_REQUEST);
         }
     }
 }
