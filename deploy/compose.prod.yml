@@ -25,6 +25,7 @@ services:
     image: ${PROD_ECR_IMAGE}
     container_name: readygsm-app
     environment:
+      - SPRING_PROFILES_ACTIVE=prod
       - MYSQL_HOST=mysql
       - MYSQL_USERNAME=${PROD_MYSQL_USERNAME}
       - MYSQL_PASSWORD=${PROD_MYSQL_PASSWORD}
