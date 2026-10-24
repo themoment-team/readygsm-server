@@ -69,6 +69,7 @@ openai:
 cors:
   allowed-origins:
     - "http://localhost:3000"
+    - "http://localhost:3001"
     - "https://kimtaeeun.site"
     - "https://www.readygsm.kr"
     - "https://readygsm-client.vercel.app"
@@ -82,6 +83,7 @@ cors:
 oauth2:
   allowed-redirect-uris:
     - "http://localhost:3000/oauth/callback"
+    - "http://localhost:3001/oauth/callback"
     - "https://stage.readygsm.kr/oauth/callback"
     - "https://www.readygsm.kr/oauth/callback"
     - "https://readygsm-client.vercel.app/oauth/callback"
